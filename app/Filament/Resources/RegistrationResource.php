@@ -7,7 +7,7 @@ use App\Services\RegistrationApprovalService;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\{TextColumn, IconColumn};
+use Filament\Tables\Columns\{TextColumn, IconColumn, ImageColumn};
 use Filament\Actions\Action;  
 
 
@@ -36,7 +36,17 @@ class RegistrationResource extends Resource {
                     'rejected' => 'danger',
                 }),
             TextColumn::make('code')->copyable(),
-            // TextColumn::make('checked_in_at')->dateTime()->toggleable(),
+            ImageColumn::make('qr_code')
+                ->label('QR Code')
+                ->state(fn (Registration $r) => $r->code ? route('ticket.qr', ['code' => $r->code]) : null)
+                ->url(fn (Registration $r) => $r->code ? route('ticket.qr', ['code' => $r->code]) : null, shouldOpenInNewTab: true)
+                ->square(),
+            TextColumn::make('checked_in_at')
+                ->label('Check-in')
+                ->state(fn (Registration $record) => filled($record->checked_in_at))
+                ->icon(fn ($state) => $state ? 'heroicon-o-check-circle' : 'heroicon-o-minus-circle')
+                ->color(fn ($state) => $state ? 'success' : 'gray')
+                ->formatStateUsing(fn () => ''),
             TextColumn::make('created_at')->dateTime()->sortable(),
         ])
         ->recordUrl(null)
