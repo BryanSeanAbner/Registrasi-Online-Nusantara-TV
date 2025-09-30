@@ -11,16 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('registrations', function (Blueprint $t) {
-            $t->id();
-            $t->foreignId('event_id')->constrained()->cascadeOnDelete();
-            $t->string('name');
-            $t->string('email')->nullable();
-            $t->string('phone');
-            $t->string('company')->nullable();
-            $t->string('qr_code')->unique();
-            $t->timestamp('checked_in_at')->nullable();
-            $t->timestamps();
+        Schema::create('registrations', function (Blueprint $table) {
+            $table->id();
+
+            // Scope ke event
+            $table->foreignId('event_id')->constrained('events')->cascadeOnDelete();
+
+            // Identitas dasar/opsional (bisa dipakai untuk kode tiket, QR, status, dsb)
+            $table->string('code')->nullable()->index(); // mis. kode registrasi/QR
+            $table->string('status')->default('pending'); // pending|approved|rejected|checked_in
+            $table->timestamp('checked_in_at')->nullable();
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['event_id','status']);
         });
     }
 

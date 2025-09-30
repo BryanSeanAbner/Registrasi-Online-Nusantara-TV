@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 use App\Filament\Resources\RegistrationResource\Pages;
 use App\Models\Registration;
+use App\Services\RegistrationApprovalService;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -25,36 +26,45 @@ class RegistrationResource extends Resource {
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                TextColumn::make('created_at')->dateTime()->sortable(),
-                TextColumn::make('event.title')->label('Event')->sortable()->searchable(),
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('phone'),
-                TextColumn::make('qr_code')->label('Code')->copyable(),
-                IconColumn::make('checked_in_at')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle')
-                    ->label('Checked'),
-            ])
-            ->recordActions([
-                Action::make('toggleCheckin')
-                    ->label('Check-in/Undo')
-                    ->action(fn (Registration $r) =>
-                        $r->update(['checked_in_at' => $r->checked_in_at ? null : now()])
-                    ),
-                Action::make('delete')
-                    ->label('Delete')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->action(fn (Registration $r) => $r->delete()),
-            ]);
+        ->columns([
+            TextColumn::make('id')->sortable(),
+            TextColumn::make('status')
+                ->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'pending' => 'warning',
+                    'approved' => 'success',
+                    'rejected' => 'danger',
+                }),
+            TextColumn::make('code')->copyable(),
+            // TextColumn::make('checked_in_at')->dateTime()->toggleable(),
+            TextColumn::make('created_at')->dateTime()->sortable(),
+        ])
+        ->recordUrl(null)
+        ->recordActions([
+            Action::make('approve')
+                ->label('Approve & QR')
+                ->icon('heroicon-m-check-badge')
+                ->requiresConfirmation()
+                ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
+                ->action(function (Registration $record, RegistrationApprovalService $svc) {
+                    $svc->approve($record);
+                }),
+            Action::make('reject')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->visible(fn (Registration $r) => $r->status !== Registration::ST_REJECTED)
+                ->action(fn (Registration $r) => $r->update([
+                    'status' => Registration::ST_REJECTED,
+                    'checked_in_at' => null,
+                ])),
+        ]);
     }
 
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListRegistrations::route('/'),
+            'view'  => Pages\ViewRegistration::route('/{record}'),
         ];
     }
 }

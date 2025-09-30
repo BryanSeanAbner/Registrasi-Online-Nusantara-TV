@@ -21,4 +21,9 @@ class Event extends Model
     {
         return $this->hasMany(Registration::class);
     }
+
+    public function formFields()
+    {
+        return $this->hasMany(FormField::class);
+    }
 }
