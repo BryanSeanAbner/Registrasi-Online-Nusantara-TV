@@ -5,6 +5,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ScanController;
+use App\Http\Controllers\SeatController;
 use Illuminate\Support\Facades\Response;
 
 // Route::get('/', function () {
@@ -38,4 +39,8 @@ Route::get('/t/{code}/qrcode/preview', function (string $code) {
 Route::middleware(['auth'])->group(function () {
     Route::get('/scan', [ScanController::class, 'page'])->name('scan.page');
     Route::post('/scan', [ScanController::class, 'scan'])->name('scan.submit');
+    Route::get('/scan/fragment/{code}', [ScanController::class, 'fragment'])->name('scan.fragment');
+
+    Route::get('/events/{event}/seats/map', [SeatController::class,'map'])->name('seats.map');
+    Route::post('/events/{event}/seats/assign', [SeatController::class,'assign'])->name('seats.assign');
 }); 

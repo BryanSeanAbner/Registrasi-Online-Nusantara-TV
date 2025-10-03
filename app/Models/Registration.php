@@ -23,4 +23,13 @@ class Registration extends Model
             $this->values->firstWhere('field.name', $fieldName)
         )->value ?? $default;
     }
+
+    public function fieldValues()
+    {
+        return $this->hasMany(FormFieldValue::class, 'registration_id');
+    }
+
+    public function seatAssignment() {
+    return $this->hasOne(\App\Models\SeatAssignment::class);
+}
 }
