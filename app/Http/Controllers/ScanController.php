@@ -31,21 +31,33 @@ class ScanController extends Controller
             ], 422);
         }
         if ($reg->checked_in_at) {
+            $seat = $reg->seatAssignment?->seat->label;
+
+            if (!$seat) {
+                return response()->json([
+                    'ok' => true,
+                    'msg' => 'Silahkan pilih Kursi Anda', 
+                    'time' => $reg->checked_in_at,
+                    'code' => $reg->code
+                ], 200);
+            }
+
             return response()->json([
-                'ok' => false,
-                'msg' => 'Sudah check-in'
-            ], 409);
+                'ok' => true,
+                'msg' => 'Sudah check-in',
+                'code' => $reg->code
+            ], 200);
         }
 
-        // DB::transaction(function () use ($reg) {
-        //     $reg->forceFill(['checked_in_at' => now()])->save();
-        //     Scan::create([
-        //         'registration_id' => $reg->id,
-        //         'code' => $reg->code,
-        //         'scanned_at' => $reg->checked_in_at,
-        //         'scanned_by' => Auth::id(),
-        //     ]);
-        // });
+        DB::transaction(function () use ($reg) {
+            $reg->forceFill(['checked_in_at' => now()])->save();
+            Scan::create([
+                'registration_id' => $reg->id,
+                'code' => $reg->code,
+                'scanned_at' => $reg->checked_in_at,
+                'scanned_by' => Auth::id(),
+            ]);
+        });
 
         return response()->json([
             'ok' => true,
