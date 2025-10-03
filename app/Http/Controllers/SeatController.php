@@ -12,7 +12,6 @@ class SeatController extends Controller
 {
     public function map(Event $event)
     {
-        // Ambil semua kursi dan status terpakai/tersedia
         $seats = Seat::with('assignment')
             ->where('event_id', $event->id)
             ->orderBy('section')->orderBy('row')->orderBy('col')
@@ -25,7 +24,7 @@ class SeatController extends Controller
                 'col'=>$s->col,
                 'type'=>$s->type,
                 'status'=>$s->status,
-                'taken'=> (bool) $s->assignment, // true jika sudah ditempati
+                'taken'=> (bool) $s->assignment,
             ]);
 
         return response()->json(['data'=>$seats]);
@@ -48,13 +47,11 @@ class SeatController extends Controller
                 return response()->json(['message'=>'Kursi tidak tersedia.'], 409);
             }
 
-            // Pastikan registrasi belum punya kursi
             $already = SeatAssignment::where('registration_id',$validated['registration_id'])->exists();
             if ($already) {
                 return response()->json(['message'=>'Registrasi sudah memiliki kursi.'], 409);
             }
 
-            // Cek kursi belum dipakai (unik seat_id dijaga oleh constraint juga)
             if (SeatAssignment::where('seat_id',$seat->id)->exists()) {
                 return response()->json(['message'=>'Kursi baru saja dipilih pihak lain.'], 409);
             }

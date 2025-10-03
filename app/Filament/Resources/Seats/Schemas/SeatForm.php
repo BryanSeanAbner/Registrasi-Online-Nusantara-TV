@@ -12,9 +12,10 @@ class SeatForm
     {
         return $schema
             ->components([
-                TextInput::make('event_id')
+                Select::make('event_id')
+                    ->relationship('event', 'title')
                     ->required()
-                    ->numeric(),
+                    ->label('Event'),
                 TextInput::make('section'),
                 TextInput::make('row'),
                 TextInput::make('col')
