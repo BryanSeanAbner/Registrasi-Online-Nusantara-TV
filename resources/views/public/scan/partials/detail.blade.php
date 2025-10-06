@@ -1,6 +1,10 @@
 <div class="border rounded p-4 space-y-1 bg-white shadow-sm">
   <div class="text-lg font-semibold mb-2">Detail Registrasi</div>
-  <div><b>Nama:</b> {{ $reg->name }}</div>
+  @foreach ($reg->fieldValues as $val)
+    @if ($val->field->show_in_scan)
+    <div><b>{{$val->field->label}}:</b> {{ $val->value }}</div>
+    @endif
+  @endforeach
   <div><b>Kode:</b> {{ $reg->code }}</div>
   <div><b>Event:</b> {{ $reg->event->title }}</div>
   <div><b>Kursi:</b> <span id="seat-label">{{ $reg->seatAssignment->seat->label ?? 'Belum ditetapkan' }}</span></div>
