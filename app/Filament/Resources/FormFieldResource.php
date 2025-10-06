@@ -10,6 +10,7 @@ use Filament\Tables;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\{IconColumn, TextColumn};
+use Filament\Tables\Filters\SelectFilter;
 
 class FormFieldResource extends Resource
 {
@@ -79,6 +80,13 @@ class FormFieldResource extends Resource
             IconColumn::make('is_required')->boolean(),
             TextColumn::make('sort_order')->sortable(),
             TextColumn::make('updated_at')->dateTime(),
+        ])
+        ->filters([
+        SelectFilter::make('event_id')
+            ->label('Event')
+            ->relationship('event', 'title')
+            ->preload()
+            ->searchable(),
         ])
         ->recordActions([
             Action::make('edit')
