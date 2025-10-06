@@ -8,6 +8,7 @@ use App\Models\FormFieldValue;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class RegistrationController extends Controller
 {
@@ -78,10 +79,11 @@ class RegistrationController extends Controller
                 ]);
             }
 
-            return response()->json([
-                'message' => 'Registrasi diterima, menunggu approval.',
-                'registration_id' => $registration->id,
-            ], 201);
+            return redirect()
+                ->route('register.thanks', ['slug' => $event->slug])
+                ->with('registration_id', $registration->id);
         });
     }
+
+    // thanks page no longer needs custom controller; route returns static view
 }

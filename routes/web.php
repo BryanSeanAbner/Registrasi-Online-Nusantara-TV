@@ -6,6 +6,7 @@ use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SeatController;
+use App\Http\Controllers\CheckAnimationController;
 use Illuminate\Support\Facades\Response;
 
 // Route::get('/', function () {
@@ -22,6 +23,9 @@ Route::get('/login', function () {
 
 Route::get('/e/{slug}/register', [RegistrationController::class, 'create'])->name('register.create');
 Route::post('/e/{slug}/register', [RegistrationController::class, 'store'])->name('register.store');
+Route::get('/e/{slug}/register/thanks', function(string $slug) {
+    return view('public.register.thanks');
+})->name('register.thanks');
 
 
 Route::get('/t/{code}', [TicketController::class, 'show'])->name('ticket.show');
@@ -44,3 +48,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/events/{event}/seats/map', [SeatController::class,'map'])->name('seats.map');
     Route::post('/events/{event}/seats/assign', [SeatController::class,'assign'])->name('seats.assign');
 }); 
+
+// Endpoint animasi SVG (dipindahkan dari routes/api.php)
+Route::get('/api/check-animation', [CheckAnimationController::class, 'svg']);
