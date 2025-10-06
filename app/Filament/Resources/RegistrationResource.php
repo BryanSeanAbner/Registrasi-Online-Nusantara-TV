@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\{TextColumn, IconColumn, ImageColumn, ViewColumn};
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Notifications\Notification;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -85,15 +86,30 @@ class RegistrationResource extends Resource {
                     ->action(fn (Registration $r) => $r->delete()),
                 
                 Action::make('choose_seat')
-                    ->label('Pilih Kursi')
+                    ->label(fn ($record) => $record->seatAssignment ? 'Ubah Kursi' : 'Pilih Kursi')
                     ->icon('heroicon-o-viewfinder-circle')
-                    ->visible(fn($record) => $record->event_id && !$record->seatAssignment)
-                    ->modalHeading('Pilih Kursi')
-                    ->modalContent(fn($record) => view('filament.modals.choose-seat', [
+                    ->visible(fn ($record) => $record->event_id && $record->checked_in_at)
+                    ->modalHeading(fn ($record) => $record->seatAssignment ? 'Ubah Kursi '.$record->seatAssignment->seat->label : 'Pilih Kursi')
+                    ->modalContent(fn ($record) => view('filament.modals.choose-seat', [
                         'eventId' => $record->event_id,
                         'registrationId' => $record->id,
+                        'currentSeatId'   => optional($record->seatAssignment)->seat_id,
                     ]))
                     ->modalSubmitAction(false),
+
+                Action::make('release_seat')
+                    ->label('Lepas Kursi')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->seatAssignment)
+                    ->action(function ($record) {
+                        $record->seatAssignment?->delete();
+                        Notification::make()
+                            ->title('Kursi dilepaskan')
+                            ->success()
+                            ->send();
+                    }),
             ]),
         ]);
     }

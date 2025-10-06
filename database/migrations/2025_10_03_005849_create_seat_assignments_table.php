@@ -19,9 +19,9 @@ return new class extends Migration
             $table->foreignId('assigned_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('assigned_at')->nullable();
             $table->timestamps();
-            $table->unique('seat_id');
-            $table->unique('registration_id');
-            $table->index(['event_id']);
+            $table->unique('seat_id', 'unique_seat');
+            $table->unique('registration_id', 'unique_registration');
+            $table->index('event_id', 'idx_event');
         });
     }
 

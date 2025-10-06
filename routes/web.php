@@ -43,4 +43,5 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/events/{event}/seats/map', [SeatController::class,'map'])->name('seats.map');
     Route::post('/events/{event}/seats/assign', [SeatController::class,'assign'])->name('seats.assign');
+    Route::delete('/events/{event}/seats/assign', [SeatController::class, 'unassign'])->name('seats.unassign');
 }); 
