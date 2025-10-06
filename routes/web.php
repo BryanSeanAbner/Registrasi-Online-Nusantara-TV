@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Response;
 
 Route::get('/', [EventController::class, 'index']);
 Route::get('/e/{slug}', [EventController::class, 'show'])->name('event.show');
+Route::get('e/asset/{img}', [EventController::class, 'eventImage'])
+    ->where('img', '.*')
+    ->name('event.image');
 
 Route::get('/login', function () {
     return redirect('/admin');
@@ -22,6 +25,7 @@ Route::get('/login', function () {
 
 Route::get('/e/{slug}/register', [RegistrationController::class, 'create'])->name('register.create');
 Route::post('/e/{slug}/register', [RegistrationController::class, 'store'])->name('register.store');
+
 
 
 Route::get('/t/{code}', [TicketController::class, 'show'])->name('ticket.show');
