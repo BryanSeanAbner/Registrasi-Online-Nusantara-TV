@@ -9,12 +9,12 @@
           $bg = '';
           
           if ($bgRaw) {
-            $bg = explode('/', $bgRaw);
             $bgPath = asset('storage/' . ltrim($bgRaw, '/'));
+            $bg = ltrim($bgRaw, '/');
           }
       @endphp
       
-      <div class="rounded-2xl shadow-xl border border-gray-200 overflow-hidden" style="@if($bgPath) background-image: url('{{ route('event.image', end($bg)) }}'); background-size: cover; background-position: center; @else background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(147,197,253,0.2) 100%); @endif">
+      <div class="rounded-2xl shadow-xl border border-gray-200 overflow-hidden" style="@if($bgPath) background-image: url('{{ route('event.image', $bg) }}'); background-size: cover; background-position: center; @else background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(147,197,253,0.2) 100%); @endif">
         <div class="flex flex-col lg:flex-row">
           <!-- Left Section - Contact Information -->
           <div class="flex-1 p-8">
@@ -27,11 +27,11 @@
                     $logo = '';
 
                     if ($logoPath) {
-                      $logo = explode('/', $logoPath);
+                      $logo = ltrim($logoPath, '/');
                     }
                 @endphp
                 @if($logoPath)
-                  <img src="{{ route('event.image', end($logo)) }}" alt="Logo" class="w-32 h-24 object-contain rounded-lg bg-white" />
+                  <img src="{{ route('event.image', $logo) }}" alt="Logo" class="w-32 h-24 object-contain rounded-lg bg-white" />
                 @else
                   <div class="w-16 h-16 bg-blue-900 rounded-lg flex items-center justify-center">
                     <span class="text-white text-2xl font-bold">ntv</span>
