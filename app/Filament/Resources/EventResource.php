@@ -9,6 +9,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\{TextColumn, IconColumn};
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -37,6 +38,24 @@ class EventResource extends Resource {
                         ->required(),
                     Toggle::make('is_published'),
                 ]),
+                Section::make([
+                    FileUpload::make('brand.logo')
+                        ->label('Logo')
+                        ->image()
+                        ->disk('public')
+                        ->directory('events/brand')
+                        ->preserveFilenames()
+                        ->imagePreviewHeight('200')
+                        ->downloadable(),
+                    FileUpload::make('brand.background')
+                        ->label('Background')
+                        ->image()
+                        ->disk('public')
+                        ->directory('events/brand')
+                        ->preserveFilenames()
+                        ->imagePreviewHeight('200')
+                        ->downloadable(),
+                ])->columns(1),
             ])->columnSpanFull(),
         ]);
     }

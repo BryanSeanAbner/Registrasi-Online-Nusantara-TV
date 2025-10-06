@@ -9,7 +9,7 @@
   @stack('styles')
 </head>
 <body>
-  <main class="container">
+  <main class="w-full">
     @yield('content')
   </main>
   @stack('scripts')
