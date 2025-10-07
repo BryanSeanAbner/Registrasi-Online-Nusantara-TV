@@ -142,7 +142,7 @@ class RegistrationResource extends Resource {
                 Action::make('choose_seat')
                     ->label(fn ($record) => $record->seatAssignment ? 'Ubah Kursi' : 'Pilih Kursi')
                     ->icon('heroicon-o-viewfinder-circle')
-                    ->visible(fn ($record) => $record->event_id && $record->checked_in_at)
+                    ->visible(fn ($record) => $record->event_id && $record->status === 'approved')
                     ->modalHeading(fn ($record) => $record->seatAssignment ? 'Ubah Kursi '.$record->seatAssignment->seat->label : 'Pilih Kursi')
                     ->modalContent(fn ($record) => view('filament.modals.choose-seat', [
                         'eventId' => $record->event_id,
