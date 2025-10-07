@@ -66,7 +66,18 @@ class FormFieldResource extends Resource
             Textarea::make('meta')
                 ->rows(3)
                 ->label('Meta JSON')
-                ->helperText('Contoh: {"rules":"min:3|max:50","options":["VIP","REGULAR"]}'),
+                ->rule('json')
+                ->helperText('Contoh: {"rules":"min:3|max:50","options":["VIP","REGULAR"]}')
+                ->afterStateHydrated(function ($component, $state) {
+                    $component->state(
+                        is_array($state) || is_object($state)
+                            ? json_encode($state, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)
+                            : ($state ?? '')
+                    );
+                })
+                ->dehydrateStateUsing(function ($state) {
+                    return blank($state) ? null : json_decode($state, true);
+                })
         ]);
     }
 
