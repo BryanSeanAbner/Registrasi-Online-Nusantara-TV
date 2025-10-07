@@ -8,7 +8,6 @@ use App\Models\FormFieldValue;
 use App\Models\Registration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 
 class RegistrationController extends Controller
 {
@@ -35,15 +34,21 @@ class RegistrationController extends Controller
 
         foreach ($fields as $f) {
             $rule = [];
+
             if ($f->is_required) $rule[] = 'required';
             switch ($f->type) {
                 case 'email':   $rule[] = 'email'; break;
                 case 'numeric': $rule[] = 'numeric'; break;
                 case 'image':   $rule[] = 'image'; break;
                 case 'date':    $rule[] = 'date'; break;
-                // tambahkan sesuai tipe lain
+                case 'select':
+                    if (!empty($f->meta['options']) && is_array($f->meta['options'])) {
+                        $allowed = implode(',', array_map(fn($v) => str_replace(',', '\,', $v), $f->meta['options']));
+                        $rule[] = "in:{$allowed}";
+                    }
+                break;
             }
-            // extra rules dari meta
+
             if (!empty($f->meta['rules'])) $rule[] = $f->meta['rules'];
             $rules[$f->name] = implode('|', $rule);
         }
@@ -59,7 +64,6 @@ class RegistrationController extends Controller
             foreach ($fields as $f) {
                 $val = $data[$f->name] ?? null;
 
-                // simpan file image ke storage publik bila tipe image
                 if ($f->type === 'image' && $val) {
                     $path = $val->store("registrations/{$registration->id}", 'public');
                     FormFieldValue::create([
@@ -84,6 +88,4 @@ class RegistrationController extends Controller
                 ->with('registration_id', $registration->id);
         });
     }
-
-    // thanks page no longer needs custom controller; route returns static view
 }
