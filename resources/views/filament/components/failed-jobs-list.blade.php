@@ -77,7 +77,6 @@
         <table class="failed-table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Queue</th>
                     <th>Exception</th>
                     <th>Failed At</th>
@@ -86,7 +85,6 @@
             <tbody>
                 @foreach ($failed as $job)
                     <tr>
-                        <td>{{ $job->id }}</td>
                         <td class="queue">{{ $job->queue }}</td>
                         <td class="text-red truncate" title="{{ $job->exception }}">
                             {{ Str::limit($job->exception, 100) }}

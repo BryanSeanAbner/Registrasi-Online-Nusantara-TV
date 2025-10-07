@@ -137,9 +137,25 @@ class RegistrationApprovalService
                 'verify' => false, // hanya aktifkan di DEV bila cert bermasalah
             ])
             ->post($url, $payload);
-
+        $responseBody = $response->body();
+        
         if ($response->failed()) {
             throw new \RuntimeException('WA API error (' . $response->status() . '): ' . $response->body());
+        }
+
+        $data = json_decode($responseBody, true);
+
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $statusCode = $data['status'] ?? null;
+            $statusText = strtolower((string)($data['message'] ?? ''));
+
+            if ($statusCode != 200 && $statusText !== 'success') {
+                throw new \RuntimeException("WA API logical error in {$phone} :  {$responseBody}");
+            }
+        } else {
+            if (!empty($responseBody) && $responseBody !== 'OK') {
+                throw new \RuntimeException("WA API unexpected response in {$phone} :  {$responseBody}");
+            }
         }
     }
 

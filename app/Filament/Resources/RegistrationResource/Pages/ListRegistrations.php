@@ -21,8 +21,10 @@ class ListRegistrations extends ListRecords
             ->color('warning')
             ->modalHeading('Daftar Failed Jobs WA')
             ->modalWidth('3xl')
+            ->modalSubmitAction(false)
+            ->modalCancelAction(false)
             ->modalContent(function () {
-                $failed = DB::table('failed_jobs')->orderBy('failed_at')->take(10)->get();
+                $failed = DB::table('failed_jobs')->orderBy('failed_at', 'DESC')->take(10)->get();
                 return view('filament.components.failed-jobs-list', [
                     'failed' => $failed,
                 ]);
