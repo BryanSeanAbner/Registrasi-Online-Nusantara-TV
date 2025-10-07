@@ -15,7 +15,7 @@
       {{-- QR Code --}}
       <div class="mt-6 flex justify-center">
         <div class="rounded-lg border bg-gray-50 p-4 shadow-inner">
-          <img src="{{ asset('storage/qr/'.$reg->qr_code.'.png') }}" 
+          <img src="{{ route('ticket.qr', $reg->code) }}" 
                alt="QR Code"
                class="w-56 h-56 object-contain" />
         </div>
