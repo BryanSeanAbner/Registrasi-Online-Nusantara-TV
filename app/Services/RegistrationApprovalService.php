@@ -100,7 +100,10 @@ class RegistrationApprovalService
 
         $phone      = $this->normalizeIndoMsisdn($rawPhone);
         $eventTitle = optional($registration->event)->title ?? '-';
-        $name       = $registration->name ?? 'Peserta';
+        $name = optional(
+            $registration->fieldValues
+                ->first(fn($fv) => str_contains(strtolower($fv->field->name ?? ''), 'name_user'))
+        )->value;
 
         $msg = <<<MSG
         🎉 *Selamat, {$name}!* 
