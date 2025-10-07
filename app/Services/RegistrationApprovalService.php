@@ -150,11 +150,11 @@ class RegistrationApprovalService
             $statusText = strtolower((string)($data['message'] ?? ''));
 
             if ($statusCode != 200 && $statusText !== 'success') {
-                throw new \RuntimeException("WA API logical error in {$phone} :  {$responseBody}");
+                throw new \RuntimeException("{$data['message']}(WA API logical error in {$phone} :  {$responseBody})");
             }
         } else {
             if (!empty($responseBody) && $responseBody !== 'OK') {
-                throw new \RuntimeException("WA API unexpected response in {$phone} :  {$responseBody}");
+                throw new \RuntimeException("{$data['message']}(WA API unexpected response in {$phone} :  {$responseBody})");
             }
         }
     }
