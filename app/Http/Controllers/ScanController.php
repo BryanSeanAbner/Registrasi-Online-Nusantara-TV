@@ -69,7 +69,7 @@ class ScanController extends Controller
 
     public function fragment(string $code)
     {
-        $reg = Registration::with(['event','seatAssignment.seat'])
+        $reg = Registration::with(['event','seatAssignment.seat', 'fieldValues.field'])
             ->where('code', $code)->firstOrFail();
         
         $html = view('public.scan.partials.detail', compact('reg'))->render();

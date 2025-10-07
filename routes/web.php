@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Response;
 
 Route::get('/', [EventController::class, 'index']);
 Route::get('/e/{slug}', [EventController::class, 'show'])->name('event.show');
+Route::get('e/asset/{img}', [EventController::class, 'eventImage'])
+    ->where('img', '.*')
+    ->name('event.image');
 
 Route::get('/login', function () {
     return redirect('/admin');
@@ -26,6 +29,7 @@ Route::post('/e/{slug}/register', [RegistrationController::class, 'store'])->nam
 Route::get('/e/{slug}/register/thanks', function(string $slug) {
     return view('public.register.thanks');
 })->name('register.thanks');
+
 
 
 Route::get('/t/{code}', [TicketController::class, 'show'])->name('ticket.show');
@@ -47,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/events/{event}/seats/map', [SeatController::class,'map'])->name('seats.map');
     Route::post('/events/{event}/seats/assign', [SeatController::class,'assign'])->name('seats.assign');
+    Route::delete('/events/{event}/seats/assign', [SeatController::class, 'unassign'])->name('seats.unassign');
 }); 
 
 // Endpoint animasi SVG (dipindahkan dari routes/api.php)

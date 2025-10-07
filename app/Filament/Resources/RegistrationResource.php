@@ -12,8 +12,13 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\{TextColumn, IconColumn, ImageColumn, ViewColumn};
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class RegistrationResource extends Resource {
@@ -57,6 +62,56 @@ class RegistrationResource extends Resource {
         ->persistFiltersInSession()
         ->persistSearchInSession()
         ->recordUrl(null)
+        ->toolbarActions([
+            BulkActionGroup::make([
+                BulkAction::make('bulkApprove')
+                    ->label('Approve Terpilih')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Approve pendaftaran terpilih?')
+                    ->modalDescription('Semua pendaftaran terpilih akan di-approve. Yang sudah approved akan otomatis di-skip. Pesan WhatsApp dikirim via background job.')
+                    ->deselectRecordsAfterCompletion()
+                    ->action(function (Collection $records) {
+                        /** @var \App\Services\RegistrationApprovalService $svc */
+                        $svc = app(RegistrationApprovalService::class);
+
+                        $records->load(['event', 'fieldValues.field']);
+
+                        $total      = $records->count();
+                        $approved   = 0;
+                        $skipped    = 0;
+                        $failed     = 0;
+                        $fails      = [];
+
+                        foreach ($records as $registration) {
+                            try {
+                                if ($registration->status === Registration::ST_APPROVED && $registration->code) {
+                                    $skipped++;
+                                    continue;
+                                }
+
+                                $svc->approve($registration);
+                                $approved++;
+                            } catch (\Throwable $e) {
+                                $failed++;
+                                $fails[] = "#{$registration->id}: " . $e->getMessage();
+                            }
+                        }
+
+                        $summary = "Total: {$total}\n"
+                                 . "✅ Approved: {$approved}\n"
+                                 . "↩️ Skipped (sudah approved): {$skipped}\n"
+                                 . "❌ Gagal: {$failed}";
+
+                        Notification::make()
+                            ->title('Bulk Approve selesai')
+                            ->body($summary . (count($fails) ? "\n\nGagal:\n- " . implode("\n- ", array_slice($fails, 0, 5)) . (count($fails) > 5 ? "\n…" : "") : ""))
+                            ->success()
+                            ->send();
+                    }),
+            ]),
+        ])
         ->recordActions([
             ActionGroup::make([
                 Action::make('approve')
@@ -85,15 +140,41 @@ class RegistrationResource extends Resource {
                     ->action(fn (Registration $r) => $r->delete()),
                 
                 Action::make('choose_seat')
-                    ->label('Pilih Kursi')
+                    ->label(fn ($record) => $record->seatAssignment ? 'Ubah Kursi' : 'Pilih Kursi')
                     ->icon('heroicon-o-viewfinder-circle')
-                    ->visible(fn($record) => $record->event_id && !$record->seatAssignment)
-                    ->modalHeading('Pilih Kursi')
-                    ->modalContent(fn($record) => view('filament.modals.choose-seat', [
+                    ->visible(fn ($record) => $record->event_id && $record->status === 'approved')
+                    ->modalHeading(fn ($record) => $record->seatAssignment ? 'Ubah Kursi '.$record->seatAssignment->seat->label : 'Pilih Kursi')
+                    ->modalContent(fn ($record) => view('filament.modals.choose-seat', [
                         'eventId' => $record->event_id,
                         'registrationId' => $record->id,
+                        'currentSeatId'   => optional($record->seatAssignment)->seat_id,
                     ]))
                     ->modalSubmitAction(false),
+
+                Action::make('release_seat')
+                    ->label('Lepas Kursi')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->seatAssignment)
+                    ->action(function ($record) {
+                        $record->seatAssignment?->delete();
+                        Notification::make()
+                            ->title('Kursi dilepaskan')
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('resendWa')
+                    ->label('Kirim Ulang WA')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Kirim ulang WhatsApp?')
+                    ->modalDescription('Pesan konfirmasi tiket akan dikirim ulang ke nomor WhatsApp peserta.')
+                    ->visible(fn ($record) => $record->status === 'approved')
+                    ->action(function ($record) {
+                        app(RegistrationApprovalService::class)->resendWa($record);
+                    }),
             ]),
         ]);
     }

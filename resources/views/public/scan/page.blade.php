@@ -168,7 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Kursi berhasil ditetapkan.');
         seatLabel && (seatLabel.textContent = seat.label);
         panelWrap && panelWrap.classList.add('hidden');
-        detail.innerHTML = '';
+        document.getElementById('btn-open-seat').classList.add('hidden');
+        // detail.innerHTML = '';
       } else {
         const data = await res.json().catch(()=>({message:'Gagal'}));
         alert(data.message || 'Gagal menugaskan kursi.');

@@ -7,6 +7,7 @@ use App\Models\Scan;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class ScanResource extends Resource
@@ -34,7 +35,7 @@ class ScanResource extends Resource
                     ->wrap(),
                 TextColumn::make('registration.event.title')
                     ->label('Event')
-                    ->sortable()
+                    // ->sortable()
                     ->toggleable(),
                 TextColumn::make('location')
                     ->label('Location')
@@ -48,6 +49,13 @@ class ScanResource extends Resource
                     ->label('Scanned At')
                     ->dateTime()
                     ->sortable(),
+            ])
+            ->filters([
+            SelectFilter::make('event_id')
+                ->label('Event')
+                ->relationship('registration.event', 'title')
+                ->preload()
+                ->searchable(),
             ])
             ->recordUrl(null)
             ->recordActions([

@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->globalSearch(false)
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -58,6 +59,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->renderHook('panels::head.end', fn () => view('filament.partials.custom-styles'))
+            ->renderHook('panels::body.end', fn () => view('filament.partials.seat-picker-js'))
             ->authMiddleware([
                 Authenticate::class,
             ]);
