@@ -17,6 +17,13 @@ class ScansTable
                 // Preload relations used by dynamic form field view
                 $query->with(['registration.event', 'registration.fieldValues.field', 'scannedBy']);
             })
+            ->modifyQueryUsing(function (Builder $query) {
+                if ($active = session('active_event_id')) {
+                    $query->whereHas('registration', function (Builder $q) use ($active) {
+                        $q->where('event_id', $active);
+                    });
+                }
+            })
             ->columns([
                 TextColumn::make('code')
                     ->label('Code')
@@ -44,13 +51,13 @@ class ScansTable
                     ->toggleable()
                     ->grow(),
             ])
-            ->filters([
-                SelectFilter::make('event_id')
-                    ->label('Event')
-                    ->relationship('registration.event', 'title')
-                    ->preload()
-                    ->searchable(),
-            ])
+            // ->filters([
+            //     SelectFilter::make('event_id')
+            //         ->label('Event')
+            //         ->relationship('registration.event', 'title')
+            //         ->preload()
+            //         ->searchable(),
+            // ])
             ->recordUrl(null)
             ->recordActions([
                 //

@@ -23,6 +23,17 @@ Route::get('/login', function () {
     return redirect('/admin');
 })->name('login');
 
+// Store active event selection for Filament admin panel
+Route::post('/admin/set-active-event', function (\Illuminate\Http\Request $request) {
+    $id = $request->input('event_id');
+    if ($id === null || $id === '') {
+        session()->forget('active_event_id');
+    } else {
+        session(['active_event_id' => (int) $id]);
+    }
+    return back();
+})->name('admin.setActiveEvent');
+
 
 Route::get('/e/{slug}/register', [RegistrationController::class, 'create'])->name('register.create');
 Route::post('/e/{slug}/register', [RegistrationController::class, 'store'])->name('register.store');

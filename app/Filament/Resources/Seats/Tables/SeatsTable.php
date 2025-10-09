@@ -15,6 +15,12 @@ class SeatsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function ($query) {
+                $active = session('active_event_id');
+                if ($active) {
+                    $query->where('event_id', $active);
+                }
+            })
             ->columns([
                 TextColumn::make('event.title')
                     ->label('Event')
@@ -46,6 +52,7 @@ class SeatsTable
                 ->label('Event')
                 ->relationship('event', 'title')
                 ->preload()
+                ->default(fn () => session('active_event_id'))
                 ->searchable(),
             ])
             ->recordActions([

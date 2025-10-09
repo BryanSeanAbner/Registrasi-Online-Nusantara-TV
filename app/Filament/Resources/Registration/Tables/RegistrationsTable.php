@@ -24,11 +24,18 @@ class RegistrationsTable
     {
         return $table
             ->modifyQueryUsing(fn ($query) => $query->with(['fieldValues.field', 'event']))
+            ->modifyQueryUsing(function (Builder $query) {
+                $active = session('active_event_id');
+                if ($active) {
+                    $query->where('event_id', $active);
+                }
+            })
             ->filters([
                 SelectFilter::make('event_id')
                     ->label('Event')
                     ->relationship('event', 'title')
                     ->preload()
+                    ->default(fn () => session('active_event_id'))
                     ->searchable(),
             ])
             ->columns([

@@ -13,7 +13,14 @@ class FormFieldsTable
 {
     public static function configure(Table $table): Table
     {
-        return $table->columns([
+        return $table
+        ->modifyQueryUsing(function ($query) {
+            $active = session('active_event_id');
+            if ($active) {
+                $query->where('event_id', $active);
+            }
+        })
+        ->columns([
             TextColumn::make('event.title')->label('Event'),
             TextColumn::make('label')->searchable(),
             TextColumn::make('name'),
@@ -27,6 +34,7 @@ class FormFieldsTable
                 ->label('Event')
                 ->relationship('event', 'title')
                 ->preload()
+                ->default(fn () => session('active_event_id'))
                 ->searchable(),
         ])
         ->recordActions([
@@ -50,4 +58,3 @@ class FormFieldsTable
         return $res::getUrl($name, ['record' => $field]);
     }
 }
-
