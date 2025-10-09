@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ScanResource\Schemas;
+namespace App\Filament\Resources\Scan\Schemas;
 
 use Filament\Schemas\Schema;
 
@@ -13,4 +13,3 @@ class ScanForm
         ]);
     }
 }
-

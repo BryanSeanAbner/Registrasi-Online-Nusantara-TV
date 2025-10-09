@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\RegistrationResource\Pages;
+namespace App\Filament\Resources\Registration\Pages;
 
-use App\Filament\Resources\RegistrationResource;
+use App\Filament\Resources\Registration\RegistrationResource;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewRegistration extends ViewRecord

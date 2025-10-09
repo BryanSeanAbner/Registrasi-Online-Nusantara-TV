@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\ScanResource\Pages;
+namespace App\Filament\Resources\Scan\Pages;
 
-use App\Filament\Resources\ScanResource\ScanResource;
+use App\Filament\Resources\Scan\ScanResource;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Table;

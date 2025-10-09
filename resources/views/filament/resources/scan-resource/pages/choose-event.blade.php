@@ -5,7 +5,7 @@
     <x-slot name="headerEnd">
         <x-filament::button
             tag="a"
-            href="{{ \App\Filament\Resources\ScanResource\ScanResource::getUrl('list') }}"
+            href="{{ \App\Filament\Resources\Scan\ScanResource::getUrl('list') }}"
         >
             Lihat Semua Scan
         </x-filament::button>
@@ -17,8 +17,8 @@
         </div>
     @else
         <div class="sp-mt-4 sp-space-y-4">
-        @foreach ($events as $event)
-            <a href="{{ \App\Filament\Resources\ScanResource\ScanResource::getUrl('by-event', ['event' => $event->id]) }}">
+            @foreach ($events as $event)
+            <a href="{{ \App\Filament\Resources\Scan\ScanResource::getUrl('by-event', ['event' => $event->id]) }}">
                 <x-filament::section :heading="$event->title">
                     <div class="text-sm">
                         @if($event->starts_at || $event->ends_at)

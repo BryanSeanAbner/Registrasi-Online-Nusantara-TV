@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\ScanResource;
+namespace App\Filament\Resources\Scan;
 
-use App\Filament\Resources\ScanResource\Pages;
-use App\Filament\Resources\ScanResource\Schemas\ScanForm;
-use App\Filament\Resources\ScanResource\Tables\ScansTable;
+use App\Filament\Resources\Scan\Pages;
+use App\Filament\Resources\Scan\Schemas\ScanForm;
+use App\Filament\Resources\Scan\Tables\ScansTable;
 use App\Models\Scan;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -36,4 +36,3 @@ class ScanResource extends Resource
         ];
     }
 }
-

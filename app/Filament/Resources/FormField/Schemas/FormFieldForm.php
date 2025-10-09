@@ -1,24 +1,16 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\FormField\Schemas;
 
-use App\Filament\Resources\FormFieldResource\Pages;
-use App\Models\FormField;
-use Filament\Actions\Action;
-use Filament\Forms\Components\{Select, Textarea, TextInput, Toggle};
-use Filament\Tables;
-use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\{IconColumn, TextColumn};
-use Filament\Tables\Filters\SelectFilter;
 
-class FormFieldResource extends Resource
+class FormFieldForm
 {
-    protected static ?string $model = FormField::class;
-    protected static string|\UnitEnum|null $navigationGroup = 'Event Management';
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-list-bullet';
-
-    public static function form(Schema $schema): Schema
+    public static function configure(Schema $schema): Schema
     {
         return $schema->components([
             Select::make('event_id')
@@ -77,48 +69,7 @@ class FormFieldResource extends Resource
                 })
                 ->dehydrateStateUsing(function ($state) {
                     return blank($state) ? null : json_decode($state, true);
-                })
+                }),
         ]);
-    }
-
-    public static function table(Tables\Table $table): Tables\Table
-    {
-        return $table->columns([
-            TextColumn::make('event.title')->label('Event'),
-            TextColumn::make('label')->searchable(),
-            TextColumn::make('name'),
-            TextColumn::make('type'),
-            IconColumn::make('is_required')->boolean(),
-            TextColumn::make('sort_order')->sortable(),
-            TextColumn::make('updated_at')->dateTime(),
-        ])
-        ->filters([
-        SelectFilter::make('event_id')
-            ->label('Event')
-            ->relationship('event', 'title')
-            ->preload()
-            ->searchable(),
-        ])
-        ->recordActions([
-            Action::make('edit')
-                ->icon('heroicon-m-pencil-square')
-                ->label('Edit')
-                ->url(fn (FormField $e) => static::getUrl('edit', ['record' => $e])),
-            Action::make('delete')
-                    ->label('Delete')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->action(fn (FormField $r) => $r->delete()),
-        ])          
-        ->defaultSort('sort_order');
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index'  => Pages\ListFormFields::route('/'),
-            'create' => Pages\CreateFormField::route('/create'),
-            'edit'   => Pages\EditFormField::route('/{record}/edit'),
-        ];
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\RegistrationResource\Pages;
+namespace App\Filament\Resources\Registration\Pages;
 
-use App\Filament\Resources\RegistrationResource;
+use App\Filament\Resources\Registration\RegistrationResource;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\DB;

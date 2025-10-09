@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ScanResource\Tables;
+namespace App\Filament\Resources\Scan\Tables;
 
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
