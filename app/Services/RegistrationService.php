@@ -7,6 +7,7 @@ use App\Models\FormFieldValue;
 use App\Models\Registration;
 use App\Repositories\Contracts\FormFieldRepositoryInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class RegistrationService
 {
@@ -27,19 +28,26 @@ class RegistrationService
         foreach ($fields as $f) {
             $rule = [];
 
-            if ($f->is_required) {
-                $rule[] = 'required';
-            }
+            // Required vs optional
+            $rule[] = $f->is_required ? 'required' : 'nullable';
 
+            // Basic type rules
             switch ($f->type) {
-                case 'email':   $rule[] = 'email'; break;
-                case 'numeric': $rule[] = 'numeric'; break;
-                case 'image':   $rule[] = 'image'; break;
-                case 'date':    $rule[] = 'date'; break;
+                case 'email':
+                    $rule[] = 'email';
+                    break;
+                case 'numeric':
+                    $rule[] = 'numeric';
+                    break;
+                case 'image':
+                    $rule[] = 'image';
+                    break;
+                case 'date':
+                    $rule[] = 'date';
+                    break;
                 case 'select':
                     if (!empty($f->meta['options']) && is_array($f->meta['options'])) {
-                        $allowed = implode(',', array_map(fn($v) => str_replace(',', '\\,', $v), $f->meta['options']));
-                        $rule[] = "in:{$allowed}";
+                        $rule[] = Rule::in($f->meta['options']);
                     }
                     break;
             }
@@ -48,7 +56,7 @@ class RegistrationService
                 $rule[] = $f->meta['rules'];
             }
 
-            $rules[$f->name] = implode('|', $rule);
+            $rules[$f->name] = $rule;
         }
 
         return $rules;
@@ -93,4 +101,3 @@ class RegistrationService
         });
     }
 }
-

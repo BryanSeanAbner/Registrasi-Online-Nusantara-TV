@@ -45,8 +45,8 @@ class FormFieldForm
                 ->required(),
 
             Toggle::make('is_required')->label('Required'),
-            Toggle::make('is_toggleable')->label('Toggleable'),
-            Toggle::make('is_hidden_by_default')->label('Hidden by default'),
+            // Toggle::make('is_toggleable')->label('Toggleable'),
+            // Toggle::make('is_hidden_by_default')->label('Hidden by default'),
             Toggle::make('show_in_form')->label('Show in Form'),
             Toggle::make('show_in_scan')->label('Show in Scan'),
 
