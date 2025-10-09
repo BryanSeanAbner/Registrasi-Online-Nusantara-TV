@@ -92,22 +92,28 @@ class RegistrationApprovalService
         }
 
         $phone      = $this->normalizeIndoMsisdn($rawPhone);
-        $eventTitle = optional($registration->event)->title ?? '-';
+        $event      = optional($registration->event);
+        $eventTitle = $event->title ?? '-';
         $name       = optional(
             $registration->fieldValues->first(fn ($fv) => str_contains(strtolower($fv->field->name ?? ''), 'name_user'))
         )->value;
 
-        $msg = <<<MSG
-        Selamat, {$name}!
+        // Build WA message from template (per event) with placeholders.
+        $qrUrl = env('WA_LINK_IMG')
+            ? env('WA_LINK_IMG') . "/t/{$registration->code}/qrcode/preview"
+            : url("/t/{$registration->code}/qrcode/preview");
 
-        Pendaftaran kamu telah DISETUJUI.
-
-        Acara: {$eventTitle}
-        Kode Tiket: {$registration->code}
-
-        Simpan kode ini dan tunjukkan QR Code saat check-in di lokasi.
-        Sampai jumpa di acara!
-        MSG;
+        $template = (string) data_get($event, 'brand.wa_template');
+        if (blank($template)) {
+            $template = "Selamat, {name}!\n\nPendaftaran kamu telah DISETUJUI.\n\nAcara: {event}\Lokasi: {location}\nKode Tiket: {code}\n\nSimpan kode ini dan tunjukkan QR Code saat check-in di lokasi.\nSampai jumpa di acara!";
+        }
+        $msg = strtr($template, [
+            '{name}'        => (string) $name,
+            '{event}'       => (string) $eventTitle,
+            '{code}'        => (string) $registration->code,
+            '{location}'    => (string) $event->venue,
+            '{qr_url}'      => (string) $qrUrl,
+        ]);
 
         $payload = [
             'api_key'         => $apiKey,
@@ -201,4 +207,3 @@ class RegistrationApprovalService
         }
     }
 }
-
