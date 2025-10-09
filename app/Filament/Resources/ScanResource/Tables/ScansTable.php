@@ -1,32 +1,22 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\ScanResource\Tables;
 
-use App\Filament\Resources\ScanResource\Pages;
-use App\Models\Scan;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class ScanResource extends Resource
+class ScansTable
 {
-    protected static ?string $model = Scan::class;
-    protected static string|\UnitEnum|null $navigationGroup = 'Operations';
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-qr-code';
-    protected static ?string $navigationLabel = 'Scans';
-
-    public static function form(Schema $schema): Schema
-    {
-        return $schema->components([
-            //
-        ]);
-    }
-
-    public static function table(Table $table): Table
+    public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                // Preload relations used by dynamic form field view
+                $query->with(['registration.event', 'registration.fieldValues.field', 'scannedBy']);
+            })
             ->columns([
                 TextColumn::make('code')
                     ->label('Code')
@@ -35,7 +25,6 @@ class ScanResource extends Resource
                     ->wrap(),
                 TextColumn::make('registration.event.title')
                     ->label('Event')
-                    // ->sortable()
                     ->toggleable(),
                 TextColumn::make('location')
                     ->label('Location')
@@ -49,24 +38,22 @@ class ScanResource extends Resource
                     ->label('Scanned At')
                     ->dateTime()
                     ->sortable(),
+                ViewColumn::make('form_answers')
+                    ->label('Form Answers')
+                    ->view('filament.tables.columns.scan-form-fields')
+                    ->toggleable()
+                    ->grow(),
             ])
             ->filters([
-            SelectFilter::make('event_id')
-                ->label('Event')
-                ->relationship('registration.event', 'title')
-                ->preload()
-                ->searchable(),
+                SelectFilter::make('event_id')
+                    ->label('Event')
+                    ->relationship('registration.event', 'title')
+                    ->preload()
+                    ->searchable(),
             ])
             ->recordUrl(null)
             ->recordActions([
                 //
             ]);
-    }    
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListScans::route('/'),
-        ];
-    }    
+    }
 }

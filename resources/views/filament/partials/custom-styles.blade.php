@@ -21,6 +21,8 @@
 .sp-card { background: var(--sp-bg); border: 1px solid var(--sp-border); border-radius: .5rem; padding: .75rem; }
 .sp-mb-2 { margin-bottom: .5rem; }
 .sp-mb-3 { margin-bottom: .75rem; }
+.sp-mt-4 { margin-top: 1rem; }
+.sp-mt-6 { margin-top: 1.5rem; }
 .sp-py-1 { padding-top: .25rem; padding-bottom: .25rem; }
 .sp-p-2 { padding: .5rem; }
 .sp-gap-2 { display: inline-flex; gap: .5rem; align-items: center; }
@@ -54,6 +56,9 @@
 /* ====== Section box ====== */
 .sp-section { border:1px solid var(--sp-border); border-radius:.5rem; padding:.75rem; }
 .sp-section-title { font-weight:600; margin-bottom:.5rem; color:var(--sp-text); }
+
+/* ====== Stack spacing helpers ====== */
+.sp-space-y-4 > * + * { margin-top: 1rem; }
 
 /* ====== Helper: Fi modal spacing (opsional) ====== */
 .fi-modal-content .sp-space-y-3 > * + * { margin-top:.75rem; }
@@ -89,6 +94,21 @@
 }
 @media (prefers-color-scheme: dark){
   .rf-badge{ background:#374151; color:#e5e7eb; }
+}
+
+/* ====== Compact key-value chips for tables ====== */
+.sp-kvlist{ display:flex; flex-wrap:wrap; gap:.375rem; }
+.sp-kv{
+  display:inline-flex; align-items:baseline; gap:.35rem;
+  padding:.25rem .5rem; border:1px solid var(--sp-border); border-radius:.5rem;
+  background: var(--sp-bg);
+}
+.sp-kv .label{ font-size:.75rem; color:#6b7280; }
+.sp-kv .value{ font-weight:600; font-size:.875rem; color:#111827; max-width:18rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+@media (prefers-color-scheme: dark){
+  .sp-kv{ border-color:#374151; background:#0b0f19; }
+  .sp-kv .label{ color:#9ca3af; }
+  .sp-kv .value{ color:#e5e7eb; }
 }
 
 </style>
