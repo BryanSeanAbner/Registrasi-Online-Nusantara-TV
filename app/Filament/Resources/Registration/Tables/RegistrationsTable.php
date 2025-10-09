@@ -23,7 +23,6 @@ class RegistrationsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with(['fieldValues.field', 'event']))
             ->modifyQueryUsing(function (Builder $query) {
                 $active = session('active_event_id');
                 if ($active) {
@@ -51,7 +50,7 @@ class RegistrationsTable
                     })
                     ->grow(),
             ])
-            ->persistFiltersInSession()
+            // Do not persist filters so active_event_id changes take effect immediately
             ->persistSearchInSession()
             ->recordUrl(null)
             ->toolbarActions([
