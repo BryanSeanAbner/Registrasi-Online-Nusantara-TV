@@ -60,7 +60,7 @@
                 <td class="px-6 py-3 text-sm font-medium text-gray-900">{{ $derivedName ?: '-' }}</td>
                 <td class="px-6 py-3 text-sm text-gray-900">
                   @if($photoPath)
-                    <img src="{{ asset('storage/' . $photoPath) }}" alt="Foto Peserta" class="h-10 w-10 rounded object-cover" />
+                    <img src="{{ asset('storage/' . $photoPath) }}" alt="Foto Peserta" class="h-20 w-20 rounded object-contain" />
                   @else
                     <span class="text-gray-400">-</span>
                   @endif

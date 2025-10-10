@@ -2,7 +2,17 @@
   <div class="text-lg font-semibold mb-2">Detail Registrasi</div>
   @foreach ($reg->fieldValues as $val)
     @if ($val->field->show_in_scan)
-    <div><b>{{$val->field->label}}:</b> {{ $val->value }}</div>
+    <div>
+      <b>{{$val->field->label}}:</b>
+      @if(($val->field->type ?? null) === 'image' && !empty($val->value))
+        @php $img = ltrim($val->value, '/'); $url = route('event.image', $img); @endphp
+        <a href="{{ $url }}" target="_blank" rel="noopener">
+          <img src="{{ $url }}" alt="{{ $val->field->label }}" class="inline-block h-14 w-14 rounded object-cover align-middle" />
+        </a>
+      @else
+        {{ $val->value }}
+      @endif
+    </div>
     @endif
   @endforeach
   <div><b>Kode:</b> {{ $reg->code }}</div>
