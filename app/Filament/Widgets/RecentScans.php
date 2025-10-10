@@ -10,6 +10,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 class RecentScans extends BaseWidget
 {
     protected static ?string $heading = 'Recent Scans';
+    protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
