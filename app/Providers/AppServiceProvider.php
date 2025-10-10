@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\Contracts\EventRepositoryInterface;
+use App\Repositories\Eloquent\EloquentEventRepository;
+use App\Repositories\Contracts\FormFieldRepositoryInterface;
+use App\Repositories\Eloquent\EloquentFormFieldRepository;
 use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,7 +16,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(EventRepositoryInterface::class, EloquentEventRepository::class);
+        $this->app->bind(FormFieldRepositoryInterface::class, EloquentFormFieldRepository::class);
     }
 
     /**

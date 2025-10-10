@@ -2,20 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Repositories\Contracts\EventRepositoryInterface as Events;
+use App\Services\EventAssetService;
 
-class EventController extends Controller {
+class EventController extends Controller
+{
+    public function __construct(
+        protected Events $events,
+        protected EventAssetService $assets,
+    ) {}
 
-    public function index() {
-        $events = Event::where('is_published', true)->orderBy('starts_at', 'desc')->get();
+    public function index()
+    {
+        $events = $this->events->getPublished();
         return view('public.events.index', compact('events'));
     }
 
-    public function show(string $slug) {
-        $event = Event::whereSlug($slug)->where('is_published', true)->firstOrFail();
-        return view('public.events.show', compact('event')); 
+    public function show(string $slug)
+    {
+        $event = $this->events->findPublishedBySlug($slug);
+        return view('public.events.show', compact('event'));
     }
 
     public function participants(string $slug)
@@ -46,5 +54,10 @@ class EventController extends Controller {
         $total = $registrations->count();
 
         return view('public.register.participant', compact('event','registrations','total'));
+    }
+
+    public function eventImage(string $img)
+    {
+        return $this->assets->streamPublicImage($img);
     }
 }

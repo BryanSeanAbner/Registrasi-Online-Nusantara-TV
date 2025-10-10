@@ -89,7 +89,7 @@
             <div class="rounded-2xl overflow-hidden h-full bg-gray-500/50">
               <!-- Card Header -->
               <div class="px-8 pt-6 pb-2">
-                <h1 class="text-2xl font-bold text-white">Daftar: {{ $event->title }}</h1>
+                <h1 class="text-2xl font-bold text-white text-center">Daftar  {{ $event->title }}</h1>
               </div>
               
               <!-- Card Body -->
