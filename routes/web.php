@@ -15,9 +15,14 @@ use Illuminate\Support\Facades\Response;
 
 Route::get('/', [EventController::class, 'index']);
 Route::get('/e/{slug}', [EventController::class, 'show'])->name('event.show');
+<<<<<<< Updated upstream
 Route::get('e/asset/{img}', [EventController::class, 'eventImage'])
     ->where('img', '.*')
     ->name('event.image');
+=======
+Route::get('/e/{slug}/participants', [EventController::class, 'participants'])->name('event.participants');
+Route::get('/participant', [EventController::class, 'participantsLatest'])->name('participants.latest');
+>>>>>>> Stashed changes
 
 Route::get('/login', function () {
     return redirect('/admin');

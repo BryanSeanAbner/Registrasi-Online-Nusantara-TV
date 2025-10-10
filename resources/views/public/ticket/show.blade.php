@@ -4,7 +4,7 @@
   <section class="px-4 py-12">
     <div class="mx-auto w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm">
       {{-- Judul --}}
-      <h1 class="text-2xl font-bold text-gray-900">E-Ticket</h1>
+      <h1 class="text-2xl font-bold text-gray-900">E-Ticket</h1>  
 
       {{-- Nama & Event --}}
       <p class="mt-3 text-gray-700">
