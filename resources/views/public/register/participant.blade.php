@@ -13,7 +13,9 @@
       <span class="text-sm font-medium text-gray-900">Total: {{ $total ?? ($registrations->count() ?? 0) }}</span>
     </div>
 
-    @php $list = $registrations ?? collect(); @endphp
+    @php $list = $registrations ?? collect(); 
+    
+    @endphp
 
     @if($list->isEmpty())
       <p class="text-gray-600">Belum ada peserta terdaftar.</p>
@@ -28,6 +30,7 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">#</th>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Nama</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Photo</th>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Waktu Check-in</th>
             </tr>
           </thead>
@@ -42,12 +45,26 @@
                   });
                   $derivedName = $val->value ?? null;
                 }
+                $photoPath = null;
+                if (isset($reg->values)) {
+                  $imgVal = $reg->values->first(function($v) {
+                    return (($v->field->type ?? null) === 'image') && !empty($v->value);
+                  });
+                  $photoPath = $imgVal->value ?? null;
+                }
                 $time = $reg->checked_in_at ?: $reg->created_at;
                 $tz = config('app.timezone', 'Asia/Jakarta');
               @endphp
               <tr class="hover:bg-gray-50">
                 <td class="px-6 py-3 text-sm text-gray-500">{{ $i + 1 }}</td>
                 <td class="px-6 py-3 text-sm font-medium text-gray-900">{{ $derivedName ?: '-' }}</td>
+                <td class="px-6 py-3 text-sm text-gray-900">
+                  @if($photoPath)
+                    <img src="{{ asset('storage/' . $photoPath) }}" alt="Foto Peserta" class="h-10 w-10 rounded object-cover" />
+                  @else
+                    <span class="text-gray-400">-</span>
+                  @endif
+                </td>
                 <td class="px-6 py-3 text-sm text-gray-800">{{ optional($time)->setTimezone($tz)->locale('id')->translatedFormat('d F Y H:i') }} WIB</td>
               </tr>
             @endforeach
