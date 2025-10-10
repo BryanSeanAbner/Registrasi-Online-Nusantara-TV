@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Response;
 
 Route::get('/', [EventController::class, 'index']);
 Route::get('/e/{slug}', [EventController::class, 'show'])->name('event.show');
+Route::get('/e/{slug}/participants', [EventController::class, 'participants'])->name('event.participants');
+Route::get('/participant', [EventController::class, 'participantsLatest'])->name('participants.latest');
 
 Route::get('/login', function () {
     return redirect('/admin');
