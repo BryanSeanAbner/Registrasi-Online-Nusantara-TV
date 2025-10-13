@@ -14,6 +14,26 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class RegistrationApprovalService
 {
+    public function getParticipantName(Registration $registration): ?string
+    {
+        return $this->getFieldValueByEventRole($registration, 'full_name_field_id')
+            ?? $this->getFieldValueByRole($registration, 'full_name')
+            ?? $this->guessNameField($registration);
+    }
+
+    public function getParticipantPhone(Registration $registration, bool $normalize = true): ?string
+    {
+        $rawPhone = $this->getFieldValueByEventRole($registration, 'wa_phone_field_id')
+            ?? $this->getFieldValueByRole($registration, 'wa_phone')
+            ?? $this->guessPhoneField($registration);
+
+        if (blank($rawPhone)) {
+            return null;
+        }
+
+        return $normalize ? $this->normalizeIndoMsisdn((string) $rawPhone) : (string) $rawPhone;
+    }
+
     public function approve(Registration $registration, ?string $code = null): Registration
     {
         if ($registration->status === Registration::ST_APPROVED && $registration->code) {
@@ -70,6 +90,74 @@ class RegistrationApprovalService
         }
     }
 
+    public function sendCustomWaMessage(Registration $registration, string $message, ?string $url = null): void
+    {
+        if (! filter_var(env('WA_ENABLED', false), FILTER_VALIDATE_BOOL)) {
+            $this->notifyInfo('WA Dimatikan', 'Pengiriman WA di-skip karena WA_ENABLED=false.');
+            return;
+        }
+
+        $apiUrl    = env('WA_API_URL');
+        $apiKey    = env('WA_API_KEY');
+        $numberKey = env('WA_NUMBER_KEY');
+
+        if (! $apiUrl || ! $apiKey || ! $numberKey) {
+            throw new \RuntimeException('WA config incomplete: set WA_API_URL, WA_API_KEY, WA_NUMBER_KEY.');
+        }
+
+        $registration->loadMissing(['event', 'fieldValues.field']);
+
+        $phone = $this->getParticipantPhone($registration);
+        if (blank($phone)) {
+            throw new \RuntimeException('Tidak ditemukan field nomor WhatsApp.');
+        }
+
+        $payload = [
+            'api_key'         => $apiKey,
+            'number_key'      => $numberKey,
+            'phone_no'        => $phone,
+            'message'         => $message,
+            'wait_until_send' => '1',
+        ];
+
+        if ($url) {
+            $payload['url'] = $url;
+        }
+
+        $response = Http::asJson()
+            ->acceptJson()
+            ->timeout(60)
+            ->connectTimeout(5)
+            ->withoutRedirecting()
+            ->withOptions([
+                'force_ip_resolve' => 'v4',
+                'headers'          => ['Connection' => 'close'],
+                'verify'           => false,
+            ])
+            ->post($apiUrl, $payload);
+
+        if ($response->failed()) {
+            throw new \RuntimeException('WA API error (' . $response->status() . '): ' . $response->body());
+        }
+
+        $responseBody = $response->body();
+        $data = json_decode($responseBody, true);
+
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $statusCode = $data['status'] ?? null;
+            $statusText = strtolower((string) ($data['message'] ?? ''));
+
+            if ($statusCode != 200 && $statusText !== 'success') {
+                $msg = (string) ($data['message'] ?? 'Unknown error');
+                throw new \RuntimeException("WA API logical error for {$phone}: {$msg}");
+            }
+        } else {
+            if (! empty($responseBody) && $responseBody !== 'OK') {
+                throw new \RuntimeException("WA API unexpected response for {$phone}: {$responseBody}");
+            }
+        }
+    }
+
     public function sendWaMessage(Registration $registration): void
     {
         if (! filter_var(env('WA_ENABLED', false), FILTER_VALIDATE_BOOL)) {
@@ -85,20 +173,13 @@ class RegistrationApprovalService
             throw new \RuntimeException('WA config incomplete: set WA_API_URL, WA_API_KEY, WA_NUMBER_KEY.');
         }
 
-        $rawPhone = $this->getFieldValueByEventRole($registration, 'wa_phone_field_id')
-            ?? $this->getFieldValueByRole($registration, 'wa_phone')
-            ?? $this->guessPhoneField($registration);
-
-        if (blank($rawPhone)) {
+        $phone = $this->getParticipantPhone($registration);
+        if (blank($phone)) {
             throw new \RuntimeException('Tidak ditemukan field nomor WhatsApp. Tandai peran field sebagai "Nomor WhatsApp" pada Form Field, atau pastikan ada field bertipe Phone.');
         }
-
-        $phone      = $this->normalizeIndoMsisdn((string) $rawPhone);
         $event      = optional($registration->event);
         $eventTitle = $event->title ?? '-';
-        $name       = $this->getFieldValueByEventRole($registration, 'full_name_field_id')
-            ?? $this->getFieldValueByRole($registration, 'full_name')
-            ?? $this->guessNameField($registration);
+        $name       = $this->getParticipantName($registration);
 
         // Build WA message from template (per event) with placeholders.
         $qrUrl = env('WA_LINK_IMG')
@@ -122,9 +203,7 @@ class RegistrationApprovalService
             'number_key'      => $numberKey,
             'phone_no'        => $phone,
             'message'         => $msg,
-            'url'             => env('WA_LINK_IMG')
-                ? env('WA_LINK_IMG')."/t/{$registration->code}/qrcode/preview"
-                : url("/t/{$registration->code}/qrcode/preview"),
+            'url'             => $qrUrl,
             'wait_until_send' => '1',
         ];
 

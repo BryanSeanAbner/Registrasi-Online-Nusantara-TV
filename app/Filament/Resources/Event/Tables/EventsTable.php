@@ -2,7 +2,11 @@
 
 namespace App\Filament\Resources\Event\Tables;
 
+use App\Services\ReminderBlastService;
 use App\Models\Event;
+use App\Models\Registration;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -32,6 +36,31 @@ class EventsTable
                     ->icon('heroicon-m-pencil-square')
                     ->label('Edit')
                     ->url(fn (Event $e) => static::getResourceUrl('edit', $e)),
+                Action::make('blast_wa_reminder')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->label('Blast WA Reminder')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Kirim Reminder WA ke peserta approved?')
+                    ->modalDescription('Pesan akan dikirim ke semua pendaftar yang statusnya Approved pada event ini.')
+                    ->form([
+                        Textarea::make('message')
+                            ->label('Pesan')
+                            ->required()
+                            ->rows(6)
+                            ->placeholder("Contoh: Halo {name}, ini pengingat acara {event} di {location} pada {date}. Mohon hadir 15 menit lebih awal. Terima kasih."),
+                    ])
+                    ->action(function (Event $event, array $data) {
+                        /** @var ReminderBlastService $svc */
+                        $svc = app(ReminderBlastService::class);
+                        $result = $svc->blast($event, (string) $data['message'], (bool) ($data['include_qr'] ?? true));
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Blast WA dijadwalkan')
+                            ->body("Total: {$result['total']}\nDikirim: {$result['dispatched']}")
+                            ->success()
+                            ->send();
+                    }),
             ]);
     }
 
@@ -42,4 +71,3 @@ class EventsTable
         return $res::getUrl($name, ['record' => $event]);
     }
 }
-
