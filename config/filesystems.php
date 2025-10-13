@@ -50,7 +50,7 @@ return [
         'public_event' => [
             'driver'     => 'local',
             'root'       => storage_path('app/public'),
-            'url'        => env('APP_URL').'/e/asset',
+            'url'        => env('APP_URL').'/images',
             'visibility' => 'public',
         ],
 
