@@ -31,7 +31,7 @@
                     }
                 @endphp
                 @if($logoPath)
-                  <img src="{{ asset('storage/' . $logo) }}" alt="Logo" class="w-32 h-24 object-contain rounded-lg bg-white" />
+                  <img src="{{ route('event.image', $logo) }}" alt="Logo" class="object-contain rounded-lg bg-white max-w-[200px] sm:max-w-[240px] md:max-w-[280px] max-h-[120px]" />
                 @else
                   <div class="w-16 h-16 bg-blue-900 rounded-lg flex items-center justify-center">
                     <span class="text-white text-2xl font-bold">ntv</span>
