@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Registration extends Model
 {
-    protected $fillable = ['event_id','code','status','checked_in_at'];
+    protected $fillable = ['event_id','code','status','checked_in_at','approved_by'];
     protected $casts   = ['checked_in_at' => 'datetime'];
 
     public const ST_PENDING  = 'pending';
@@ -32,4 +32,9 @@ class Registration extends Model
     public function seatAssignment() {
     return $this->hasOne(\App\Models\SeatAssignment::class);
 }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
 }

@@ -185,6 +185,10 @@ class RegistrationsTable
                     'rejected' => 'danger',
                 })
                 ->searchable(),
+            TextColumn::make('approver.name')
+                ->label('Approved By')
+                ->toggleable()
+                ->sortable(),
             TextColumn::make('code')->copyable()->searchable(),
             ImageColumn::make('qr_code')
                 ->label('QR Code')
@@ -204,4 +208,3 @@ class RegistrationsTable
         ];
     }
 }
-

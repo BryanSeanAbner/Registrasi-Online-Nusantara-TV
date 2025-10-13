@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\SendWaMessageJob;
 use App\Models\Registration;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -23,8 +24,9 @@ class RegistrationApprovalService
         $code = $code ?: 'REG-' . now()->format('Ymd') . '-' . Str::upper(Str::random(8));
 
         $registration->update([
-            'status' => Registration::ST_APPROVED,
-            'code'   => $code,
+            'status'      => Registration::ST_APPROVED,
+            'code'        => $code,
+            'approved_by' => Auth::id(),
         ]);
 
         $png = QrCode::format('png')->size(512)->margin(1)->generate($code);
@@ -128,7 +130,7 @@ class RegistrationApprovalService
 
         $response = Http::asJson()
             ->acceptJson()
-            ->timeout(20)
+            ->timeout(60)
             ->connectTimeout(5)
             ->withoutRedirecting()
             ->withOptions([
