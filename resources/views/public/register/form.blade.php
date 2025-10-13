@@ -155,11 +155,8 @@
                           @break
 
                         @case('radio')
-                          @php
-                              $options = json_decode($field->meta, true)['options'] ?? [];
-                          @endphp
                           <div class="space-y-2">
-                            @foreach($options as $opt)
+                            @foreach(($field->meta['options'] ?? []) as $opt)
                               <label class="flex items-center space-x-2 text-gray-700">
                                 <input type="radio" name="{{ $field->name }}" value="{{ $opt }}" class="text-blue-600 focus:ring-blue-500">
                                 <span>{{ $opt }}</span>

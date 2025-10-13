@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class FormField extends Model
 {
@@ -46,5 +47,17 @@ class FormField extends Model
 
     public function event(){ 
         return $this->belongsTo(Event::class); 
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (FormField $field) {
+            if (blank($field->name) && filled($field->label)) {
+                $event = $field->event_id ? Event::find($field->event_id) : null;
+                $labelSlug = Str::slug($field->label, '_');
+                $eventSlug = $event ? Str::slug($event->slug ?: $event->title, '_') : '';
+                $field->name = trim($labelSlug . ($eventSlug ? '_' . $eventSlug : ''), '_');
+            }
+        });
     }
 }

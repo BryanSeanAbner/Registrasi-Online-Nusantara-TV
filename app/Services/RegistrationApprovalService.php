@@ -83,20 +83,20 @@ class RegistrationApprovalService
             throw new \RuntimeException('WA config incomplete: set WA_API_URL, WA_API_KEY, WA_NUMBER_KEY.');
         }
 
-        $rawPhone = optional(
-            $registration->fieldValues->first(fn ($fv) => str_contains(strtolower($fv->field->name ?? ''), 'no_wa'))
-        )->value;
+        $rawPhone = $this->getFieldValueByEventRole($registration, 'wa_phone_field_id')
+            ?? $this->getFieldValueByRole($registration, 'wa_phone')
+            ?? $this->guessPhoneField($registration);
 
         if (blank($rawPhone)) {
-            throw new \RuntimeException('Tidak ditemukan field yang mengandung kata "no_wa".');
+            throw new \RuntimeException('Tidak ditemukan field nomor WhatsApp. Tandai peran field sebagai "Nomor WhatsApp" pada Form Field, atau pastikan ada field bertipe Phone.');
         }
 
-        $phone      = $this->normalizeIndoMsisdn($rawPhone);
+        $phone      = $this->normalizeIndoMsisdn((string) $rawPhone);
         $event      = optional($registration->event);
         $eventTitle = $event->title ?? '-';
-        $name       = optional(
-            $registration->fieldValues->first(fn ($fv) => str_contains(strtolower($fv->field->name ?? ''), 'name_user'))
-        )->value;
+        $name       = $this->getFieldValueByEventRole($registration, 'full_name_field_id')
+            ?? $this->getFieldValueByRole($registration, 'full_name')
+            ?? $this->guessNameField($registration);
 
         // Build WA message from template (per event) with placeholders.
         $qrUrl = env('WA_LINK_IMG')
@@ -176,6 +176,55 @@ class RegistrationApprovalService
         return $digits;
     }
 
+    private function getFieldValueByRole(Registration $registration, string $role): mixed
+    {
+        $fv = $registration->fieldValues->first(function ($fv) use ($role) {
+            $meta = (array) ($fv->field->meta ?? []);
+            return ($meta['role'] ?? null) === $role;
+        });
+        return $fv?->value;
+    }
+
+    private function guessPhoneField(Registration $registration): ?string
+    {
+        // Prefer type=phone
+        $fv = $registration->fieldValues->first(function ($fv) {
+            return ($fv->field->type ?? null) === 'phone' && filled($fv->value);
+        });
+        if ($fv) return (string) $fv->value;
+
+        // Fallback: name/label contains wa / whatsapp / phone
+        $fv = $registration->fieldValues->first(function ($fv) {
+            $name  = strtolower((string) ($fv->field->name ?? ''));
+            $label = strtolower((string) ($fv->field->label ?? ''));
+            return (str_contains($name, 'wa') || str_contains($label, 'wa') ||
+                    str_contains($name, 'whatsapp') || str_contains($label, 'whatsapp') ||
+                    str_contains($name, 'phone') || str_contains($label, 'phone') ||
+                    str_contains($name, 'telepon') || str_contains($label, 'telepon'))
+                && filled($fv->value);
+        });
+        return $fv?->value;
+    }
+
+    private function guessNameField(Registration $registration): ?string
+    {
+        // Prefer obvious name labels
+        $fv = $registration->fieldValues->first(function ($fv) {
+            $name  = strtolower((string) ($fv->field->name ?? ''));
+            $label = strtolower((string) ($fv->field->label ?? ''));
+            return (str_contains($name, 'name') || str_contains($label, 'name') ||
+                    str_contains($name, 'nama') || str_contains($label, 'nama'))
+                && filled($fv->value);
+        });
+        if ($fv) return (string) $fv->value;
+
+        // Fallback: first non-empty text/email
+        $fv = $registration->fieldValues->first(function ($fv) {
+            return in_array(($fv->field->type ?? ''), ['text','email']) && filled($fv->value);
+        });
+        return $fv?->value;
+    }
+
     private function notifySuccess(string $title, ?string $body = null): void
     {
         $this->notify('success', $title, $body);
@@ -205,5 +254,16 @@ class RegistrationApprovalService
         } catch (\Throwable) {
             // Aman di luar konteks Filament (CLI/job)
         }
+    }
+
+    private function getFieldValueByEventRole(Registration $registration, string $brandRoleKey): mixed
+    {
+        $event = $registration->event;
+        if (! $event) return null;
+        $fieldId = data_get($event->brand, 'roles.' . $brandRoleKey);
+        if (! $fieldId) return null;
+
+        $fv = $registration->fieldValues->first(fn ($v) => (int) $v->field_id === (int) $fieldId);
+        return $fv?->value;
     }
 }
