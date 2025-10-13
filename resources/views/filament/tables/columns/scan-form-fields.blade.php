@@ -11,8 +11,15 @@
                 $label = $fv->field->label ?? \Illuminate\Support\Str::title(str_replace('_', ' ', (string)($fv->field->name ?? '')));
                 $value = (string) ($fv->value ?? '');
 
-                // Format ringan: link untuk URL, tel untuk nomor.
                 $formatted = $value;
+                // Jika image upload, render thumbnail yang bisa diklik
+                if (($fv->field->type ?? null) === 'image' && $value !== '') {
+                    $path = ltrim($value, '/');
+                    $imgUrl = route('event.image', $path);
+                    $formatted = '<a href="' . e($imgUrl) . '" target="_blank" rel="noopener">'
+                               . '<img src="' . e($imgUrl) . '" alt="Foto" style="height:40px;width:40px;object-fit:cover;border-radius:6px;" />'
+                               . '</a>';
+                }
                 if (preg_match('~^https?://~i', $value)) {
                     $formatted = '<a href="' . e($value) . '" target="_blank" rel="noopener">' . e($value) . '</a>';
                 } elseif (preg_match('~^\+?\d[\d\s\-]{7,}$~', $value)) {

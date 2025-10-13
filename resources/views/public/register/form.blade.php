@@ -14,7 +14,7 @@
           }
       @endphp
       
-      <div class="rounded-2xl shadow-xl border border-gray-200 overflow-hidden" style="@if($bgPath) background-image: url('{{ route('event.image', $bg) }}'); background-size: cover; background-position: center; @else background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(147,197,253,0.2) 100%); @endif">
+      <div class="rounded-2xl shadow-xl border border-gray-200 overflow-hidden" style="@if($bgPath) background-image: url('{{ $bgPath }}'); background-size: cover; background-position: center; @else background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(147,197,253,0.2) 100%); @endif">
         <div class="flex flex-col lg:flex-row">
           <!-- Left Section - Contact Information -->
           <div class="flex-1 p-8">
