@@ -15,13 +15,27 @@ use Illuminate\Support\Facades\Response;
 
 Route::get('/', [EventController::class, 'index']);
 Route::get('/e/{slug}', [EventController::class, 'show'])->name('event.show');
-Route::get('e/asset/{img}', [EventController::class, 'eventImage'])
+Route::get('/e/{slug}/participants', [EventController::class, 'participants'])->name('event.participants');
+Route::get('/participant', [EventController::class, 'participantsLatest'])->name('participants.latest');
+// Stream event-related public images via controller (avoid exposing raw storage paths)
+Route::get('/images/{img}', [EventController::class, 'eventImage'])
     ->where('img', '.*')
     ->name('event.image');
 
 Route::get('/login', function () {
     return redirect('/admin');
 })->name('login');
+
+// Store active event selection for Filament admin panel
+Route::post('/admin/set-active-event', function (\Illuminate\Http\Request $request) {
+    $id = $request->input('event_id');
+    if ($id === null || $id === '') {
+        session()->forget('active_event_id');
+    } else {
+        session(['active_event_id' => (int) $id]);
+    }
+    return back();
+})->name('admin.setActiveEvent');
 
 
 Route::get('/e/{slug}/register', [RegistrationController::class, 'create'])->name('register.create');
