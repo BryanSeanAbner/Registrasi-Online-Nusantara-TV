@@ -50,6 +50,7 @@ class SendCustomWaMessageJob implements ShouldQueue
             ]);
         }
 
+        $caught = null;
         try {
             $service->sendCustomWaMessage($reg, $this->message, $this->url);
             if ($msgModel) {
@@ -61,15 +62,15 @@ class SendCustomWaMessageJob implements ShouldQueue
                     optional($msgModel->blast)->increment('sent');
                 }
             }
-
-            // Database notification (success)
-            $this->notifyDatabase(
-                title: 'WA terkirim',
-                body: 'Pesan WA berhasil dikirim ke peserta.',
-                url: \App\Filament\Resources\Registration\RegistrationResource::getUrl('view', ['record' => $reg]),
-                success: true,
-                userId: $this->notifyUserId ?: optional($msgModel?->blast)->initiated_by,
-            );
+            if (! $msgModel || ! $msgModel->blast_id) {
+                $this->notifyDatabase(
+                    title: 'WA terkirim',
+                    body: 'Pesan WA berhasil dikirim ke peserta.',
+                    url: \App\Filament\Resources\Registration\RegistrationResource::getUrl('view', ['record' => $reg]),
+                    success: true,
+                    userId: $this->notifyUserId ?: optional($msgModel?->blast)->initiated_by,
+                );
+            }
         } catch (\Throwable $e) {
             if ($msgModel) {
                 $msgModel->update([
@@ -81,8 +82,7 @@ class SendCustomWaMessageJob implements ShouldQueue
                     optional($msgModel->blast)->increment('failed');
                 }
             }
-
-            // Database notification (failure)
+            // Notifikasi kegagalan selalu dikirim (baik single maupun blast)
             $this->notifyDatabase(
                 title: 'WA gagal dikirim',
                 body: 'Pengiriman WA gagal: ' . $e->getMessage(),
@@ -90,7 +90,15 @@ class SendCustomWaMessageJob implements ShouldQueue
                 success: false,
                 userId: $this->notifyUserId ?: optional($msgModel?->blast)->initiated_by,
             );
-            throw $e;
+            $caught = $e;
+        } finally {
+            // Jika bagian dari blast, cek apakah semua pesan sudah selesai dan kirim ringkasan
+            if ($msgModel && $msgModel->blast_id) {
+                $this->maybeNotifyBlastSummary($msgModel->blast_id);
+            }
+            if ($caught) {
+                throw $caught;
+            }
         }
     }
 
@@ -122,5 +130,44 @@ class SendCustomWaMessageJob implements ShouldQueue
         } catch (\Throwable) {
             // Ignore notification delivery failures
         }
+    }
+
+    private function maybeNotifyBlastSummary(int $blastId): void
+    {
+        try {
+            $blast = \App\Models\WaBlast::find($blastId);
+            if (! $blast) return;
+
+            $remaining = \App\Models\WaMessage::where('blast_id', $blastId)
+                ->whereIn('status', ['queued', 'dispatched'])
+                ->count();
+
+            if ($remaining === 0) {
+                // Hindari duplikasi notifikasi dengan conditional update
+                $updated = \App\Models\WaBlast::where('id', $blastId)
+                    ->where('status', '!=', 'completed')
+                    ->update([
+                        'status' => 'completed',
+                        'finished_at' => now(),
+                    ]);
+
+                if ($updated > 0) {
+                    // Refresh blast to get latest counters
+                    $blast = $blast->fresh();
+                    $userId = $blast->initiated_by;
+                    if ($userId) {
+                        $user = \App\Models\User::find($userId);
+                        if ($user) {
+                            Notification::make()
+                                ->title('Blast WA selesai')
+                                ->body("Total: {$blast->total}\nTerkirim: {$blast->sent}\nGagal: {$blast->failed}")
+                                ->success()
+                                ->persistent()
+                                ->sendToDatabase($user);
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable) {}
     }
 }

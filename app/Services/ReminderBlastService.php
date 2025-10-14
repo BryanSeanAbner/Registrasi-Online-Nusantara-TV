@@ -66,10 +66,9 @@ class ReminderBlastService
                 }
             });
 
+        // Jangan tandai selesai di sini; tunggu semua job selesai.
         $blast->update([
-            'total'       => $total,
-            'status'      => 'completed',
-            'finished_at' => now(),
+            'total' => $total,
         ]);
 
         return compact('total', 'dispatched');

@@ -54,7 +54,7 @@ class EventsTable
                     ->action(function (Event $event, array $data) {
                         /** @var ReminderBlastService $svc */
                         $svc = app(ReminderBlastService::class);
-                        $result = $svc->blast($event, (string) $data['message'], (bool) ($data['include_qr'] ?? true));
+                        $result = $svc->blast($event, (string) $data['message'], (bool) (false));
 
                         $notif = \Filament\Notifications\Notification::make()
                             ->title('Blast WA dijadwalkan')
