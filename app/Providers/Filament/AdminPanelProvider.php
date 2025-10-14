@@ -31,6 +31,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->globalSearch(false)
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('15s')
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -73,4 +75,3 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 }
-

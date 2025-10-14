@@ -11,6 +11,7 @@ use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class EventsTable
 {
@@ -55,11 +56,14 @@ class EventsTable
                         $svc = app(ReminderBlastService::class);
                         $result = $svc->blast($event, (string) $data['message'], (bool) ($data['include_qr'] ?? true));
 
-                        \Filament\Notifications\Notification::make()
+                        $notif = \Filament\Notifications\Notification::make()
                             ->title('Blast WA dijadwalkan')
                             ->body("Total: {$result['total']}\nDikirim: {$result['dispatched']}")
                             ->success()
-                            ->send();
+                            ->persistent();
+
+                        $notif->send();
+                        try { $notif->sendToDatabase(Auth::user()); } catch (\Throwable) {}
                     }),
             ]);
     }

@@ -52,8 +52,25 @@ class RegistrationApprovalService
         $png = QrCode::format('png')->size(512)->margin(1)->generate($code);
         Storage::disk('public')->put("qrcodes/{$code}.png", $png);
 
+        $phone = $this->getParticipantPhone($registration);
+
         try {
-            dispatch(new SendWaMessageJob($registration));
+            $msgId = null;
+            try {
+                $msgRow = \App\Models\WaMessage::create([
+                    'blast_id'        => null,
+                    'event_id'        => (int) $registration->event_id,
+                    'registration_id' => (int) $registration->id,
+                    'phone'           => $this->getParticipantPhone($registration) ?? null,
+                    'code'            => $code,
+                    'status'          => 'queued',
+                ]);
+                $msgId = $msgRow->id;
+            } catch (\Throwable) {
+                // error
+            }
+
+            dispatch(new SendWaMessageJob($registration, $msgId, Auth::id(), $phone));
             $this->notifySuccess('Disetujui', 'Kode dan pesan WhatsApp berhasil dikirim ke peserta.');
         } catch (\Throwable $e) {
             $this->notifyError('WA Gagal Dikirim', 'Approval berhasil, namun pengiriman WhatsApp gagal: ' . $e->getMessage());
@@ -81,8 +98,23 @@ class RegistrationApprovalService
             return;
         }
 
+        $phone = $this->getParticipantPhone($registration);
+
         try {
-            dispatch(new SendWaMessageJob($registration));
+            $msgId = null;
+            try {
+                $msgRow = \App\Models\WaMessage::create([
+                    'blast_id'        => null,
+                    'event_id'        => (int) $registration->event_id,
+                    'registration_id' => (int) $registration->id,
+                    'phone'           => $this->getParticipantPhone($registration) ?? null,
+                    'code'            => (string) $registration->code,
+                    'status'          => 'queued',
+                ]);
+                $msgId = $msgRow->id;
+            } catch (\Throwable) {}
+
+            dispatch(new SendWaMessageJob($registration, $msgId, Auth::id(), $phone));
             Cache::put($cacheKey, true, now()->addSeconds(60));
             $this->notifySuccess('WA Dikirim Ulang', 'Pesan WhatsApp berhasil dikirim ulang ke peserta.');
         } catch (\Throwable $e) {

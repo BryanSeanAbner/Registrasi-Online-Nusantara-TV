@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Jobs\SendCustomWaMessageJob;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Models\WaBlast;
+use App\Models\WaMessage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ReminderBlastService
@@ -23,15 +26,32 @@ class ReminderBlastService
         $total = 0;
         $dispatched = 0;
 
-        $event->loadMissing('registrations');
+        $blast = WaBlast::create([
+            'event_id'    => $event->id,
+            'initiated_by'=> Auth::id(),
+            'template'    => $template,
+            'include_qr'  => $includeQr,
+            'status'      => 'running',
+            'started_at'  => now(),
+        ]);
 
         $event->registrations()
             ->where('status', Registration::ST_APPROVED)
             ->orderBy('id')
-            ->chunkById(500, function ($regs) use ($event, $template, $includeQr, &$total, &$dispatched) {
+            ->chunkById(500, function ($regs) use ($event, $template, $includeQr, &$total, &$dispatched, $blast) {
                 $regs->load(['fieldValues.field']);
                 foreach ($regs as $reg) {
                     $total++;
+
+                    $phone = $this->approval->getParticipantPhone($reg) ?? null;
+                    $msgRow = WaMessage::create([
+                        'blast_id'        => $blast->id,
+                        'event_id'        => $event->id,
+                        'registration_id' => $reg->id,
+                        'phone'           => $phone,
+                        'code'            => $reg->code,
+                        'status'          => 'queued',
+                    ]);
 
                     $message = $this->renderTemplate($event, $reg, $template, $includeQr);
                     $qrUrl = $includeQr && $reg->code
@@ -40,10 +60,17 @@ class ReminderBlastService
                             : url("/t/{$reg->code}/qrcode/preview"))
                         : null;
 
-                    dispatch(new SendCustomWaMessageJob($reg, $message, $qrUrl));
+                    dispatch(new SendCustomWaMessageJob($reg, $message, $qrUrl, $msgRow->id, Auth::id()));
                     $dispatched++;
+                    $blast->increment('dispatched');
                 }
             });
+
+        $blast->update([
+            'total'       => $total,
+            'status'      => 'completed',
+            'finished_at' => now(),
+        ]);
 
         return compact('total', 'dispatched');
     }
@@ -67,4 +94,3 @@ class ReminderBlastService
         return strtr($template, $replacements);
     }
 }
-

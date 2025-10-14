@@ -13,6 +13,8 @@ use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -166,6 +168,57 @@ class RegistrationsTable
                         ->action(function ($record) {
                             app(RegistrationApprovalService::class)->resendWa($record);
                         }),
+
+                    // Action::make('send_custom_wa')
+                    //     ->label('Kirim WA Custom')
+                    //     ->icon('heroicon-o-chat-bubble-left-right')
+                    //     ->color('success')
+                    //     ->form([
+                    //         Textarea::make('message')
+                    //             ->label('Pesan')
+                    //             ->required()
+                    //             ->rows(6)
+                    //             ->placeholder("Halo {name}, info acara {event} di {location} pada {date}. Kode: {code}"),
+                    //         Toggle::make('include_qr')
+                    //             ->label('Sertakan link QR tiket')
+                    //             ->default(true),
+                    //     ])
+                    //     ->action(function (Registration $record, array $data) {
+                    //         $event = $record->event;
+                    //         $name  = app(\App\Services\RegistrationApprovalService::class)->getParticipantName($record) ?? '';
+                    //         $msg   = strtr((string) $data['message'], [
+                    //             '{name}'     => (string) $name,
+                    //             '{event}'    => (string) ($event->title ?? ''),
+                    //             '{location}' => (string) ($event->venue ?? ''),
+                    //             '{code}'     => (string) ($record->code ?? ''),
+                    //             '{date}'     => optional($event->starts_at)?->format('d M Y H:i') ?? '',
+                    //         ]);
+
+                    //         $qrUrl = null;
+                    //         if (($data['include_qr'] ?? true) && $record->code) {
+                    //             $qrUrl = env('WA_LINK_IMG')
+                    //                 ? env('WA_LINK_IMG') . "/t/{$record->code}/qrcode/preview"
+                    //                 : url("/t/{$record->code}/qrcode/preview");
+                    //         }
+
+                    //         // Log ke wa_messages untuk tracking
+                    //         $msgRow = \App\Models\WaMessage::create([
+                    //             'blast_id'        => null,
+                    //             'event_id'        => (int) $record->event_id,
+                    //             'registration_id' => (int) $record->id,
+                    //             'phone'           => app(\App\Services\RegistrationApprovalService::class)->getParticipantPhone($record) ?? null,
+                    //             'code'            => (string) ($record->code ?? ''),
+                    //             'status'          => 'queued',
+                    //         ]);
+
+                    //         dispatch(new \App\Jobs\SendCustomWaMessageJob($record, $msg, $qrUrl, $msgRow->id));
+
+                    //         Notification::make()
+                    //             ->title('WA dijadwalkan')
+                    //             ->body('Pesan WA telah dijadwalkan untuk peserta ini.')
+                    //             ->success()
+                    //             ->send();
+                    //     }),
                 ]),
             ]);
     }
