@@ -21,7 +21,7 @@ class ReminderBlastService
      *
      * @return array{total:int, dispatched:int}
      */
-    public function blast(Event $event, string $template, bool $includeQr = true): array
+    public function blast(Event $event, string $template, bool $includeQr = false): array
     {
         $total = 0;
         $dispatched = 0;

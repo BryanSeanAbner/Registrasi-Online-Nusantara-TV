@@ -14,6 +14,19 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class RegistrationApprovalService
 {
+    private ?string $apiSendMsg;
+    private ?string $apiSendMsgImg;
+    private ?string $apiKey;
+    private ?string $numberKey;
+
+    public function __construct()
+    {
+        $this->apiSendMsg    = config('wa.api_send_msg');
+        $this->apiSendMsgImg = config('wa.api_send_msg_img');
+        $this->apiKey     = config('wa.api_key');
+        $this->numberKey  = config('wa.number_key');
+    }
+
     public function getParticipantName(Registration $registration): ?string
     {
         return $this->getFieldValueByEventRole($registration, 'full_name_field_id')
@@ -124,17 +137,17 @@ class RegistrationApprovalService
 
     public function sendCustomWaMessage(Registration $registration, string $message, ?string $url = null): void
     {
-        if (! filter_var(env('WA_ENABLED', false), FILTER_VALIDATE_BOOL)) {
+        if (! filter_var((string) config('wa.enabled', false), FILTER_VALIDATE_BOOL)) {
             $this->notifyInfo('WA Dimatikan', 'Pengiriman WA di-skip karena WA_ENABLED=false.');
             return;
         }
 
-        $apiUrl    = env('WA_API_URL');
-        $apiKey    = env('WA_API_KEY');
-        $numberKey = env('WA_NUMBER_KEY');
+        $endpoint  = $this->apiSendMsg;
+        $apiKey    = $this->apiKey;
+        $numberKey = $this->numberKey;
 
-        if (! $apiUrl || ! $apiKey || ! $numberKey) {
-            throw new \RuntimeException('WA config incomplete: set WA_API_URL, WA_API_KEY, WA_NUMBER_KEY.');
+        if (! $endpoint || ! $apiKey || ! $numberKey) {
+            throw new \RuntimeException('WA config incomplete: set wa.api_send_msg, wa.api_send_msg_img, wa.api_key, wa.number_key.');
         }
 
         $registration->loadMissing(['event', 'fieldValues.field']);
@@ -166,7 +179,7 @@ class RegistrationApprovalService
                 'headers'          => ['Connection' => 'close'],
                 'verify'           => false,
             ])
-            ->post($apiUrl, $payload);
+            ->post($endpoint, $payload);
 
         if ($response->failed()) {
             throw new \RuntimeException('WA API error (' . $response->status() . '): ' . $response->body());
@@ -192,17 +205,17 @@ class RegistrationApprovalService
 
     public function sendWaMessage(Registration $registration): void
     {
-        if (! filter_var(env('WA_ENABLED', false), FILTER_VALIDATE_BOOL)) {
+        if (! filter_var((string) config('wa.enabled', false), FILTER_VALIDATE_BOOL)) {
             $this->notifyInfo('WA Dimatikan', 'Pengiriman WA di-skip karena WA_ENABLED=false.');
             return;
         }
 
-        $url       = env('WA_API_URL');
-        $apiKey    = env('WA_API_KEY');
-        $numberKey = env('WA_NUMBER_KEY');
+        $apiKey    = $this->apiKey;
+        $numberKey = $this->numberKey;
+        $endpoint  = $this->apiSendMsgImg;
 
-        if (! $url || ! $apiKey || ! $numberKey) {
-            throw new \RuntimeException('WA config incomplete: set WA_API_URL, WA_API_KEY, WA_NUMBER_KEY.');
+        if (! $endpoint || ! $apiKey || ! $numberKey) {
+            throw new \RuntimeException('WA config incomplete: set wa.api_send_msg or wa.api_send_msg_img, wa.api_key, wa.number_key.');
         }
 
         $phone = $this->getParticipantPhone($registration);
@@ -249,7 +262,7 @@ class RegistrationApprovalService
                 'headers'          => ['Connection' => 'close'],
                 'verify'           => false, // aktifkan true di production bila cert OK
             ])
-            ->post($url, $payload);
+            ->post($endpoint, $payload);
 
         $responseBody = $response->body();
 
