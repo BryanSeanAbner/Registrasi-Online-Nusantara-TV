@@ -9,6 +9,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Maatwebsite\Excel\Facades\Excel;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -54,8 +55,17 @@ class RegistrationsTable
             ])
             ->persistSearchInSession()
             ->recordUrl(null)
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
+                    BulkAction::make('export')
+                        ->label('Export Excel')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(function (Collection $records) {
+                            return Excel::download(
+                                new \App\Exports\RegistrationsExport($records),
+                                'registrations-' . now()->format('Y-m-d') . '.xlsx'
+                            );
+                        }),
                     BulkAction::make('bulkApprove')
                         ->label('Approve Terpilih')
                         ->icon('heroicon-o-check-badge')
