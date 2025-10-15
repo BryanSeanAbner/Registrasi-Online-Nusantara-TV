@@ -52,7 +52,6 @@ class RegistrationsTable
                     })
                     ->grow(),
             ])
-            // Do not persist filters so active_event_id changes take effect immediately
             ->persistSearchInSession()
             ->recordUrl(null)
             ->toolbarActions([

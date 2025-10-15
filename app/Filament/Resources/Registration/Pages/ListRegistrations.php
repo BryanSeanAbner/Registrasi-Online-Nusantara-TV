@@ -14,6 +14,12 @@ class ListRegistrations extends ListRecords
     protected function getHeaderActions(): array
 {
     return [
+        Action::make('create_manual')
+            ->label('Daftarkan Manual')
+            ->icon('heroicon-o-user-plus')
+            ->button()
+            ->color('primary')
+            ->url(fn () => static::getResource()::getUrl('create')),
         Action::make('status_wa')
             ->label('Status WA')
             ->icon('heroicon-o-chat-bubble-bottom-center-text')
