@@ -19,7 +19,7 @@ class EditProfile extends Page
     protected static ?string $navigationLabel = 'Edit Profile';
     protected static string|UnitEnum|null $navigationGroup = 'Account';
     protected static ?int $navigationSort = 1;
-    protected string $view = 'filament.pages.edit-profile';
+    protected string $view = 'filament.pages.costome-page';
 
     public ?array $data = [];
 
