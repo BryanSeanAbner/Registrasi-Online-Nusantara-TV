@@ -1,23 +1,23 @@
 <?php
 
-namespace App\Filament\Resources\Seats;
+namespace App\Filament\Resources\SeatTables;
 
-use App\Filament\Resources\Seats\Pages\CreateSeat;
-use App\Filament\Resources\Seats\Pages\EditSeat;
-use App\Filament\Resources\Seats\Pages\ListSeats;
-use App\Filament\Resources\Seats\Schemas\SeatForm;
-use App\Filament\Resources\Seats\Tables\SeatsTable;
-use App\Models\Seat;
+use App\Filament\Resources\SeatTables\Pages\CreateSeatTable;
+use App\Filament\Resources\SeatTables\Pages\EditSeatTable;
+use App\Filament\Resources\SeatTables\Pages\ListSeatTables;
+use App\Filament\Resources\SeatTables\Schemas\SeatTableForm;
+use App\Filament\Resources\SeatTables\Tables\SeatTablesTable;
+use App\Models\SeatTable;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
-class SeatResource extends Resource
+class SeatTableResource extends Resource
 {
-    protected static ?string $model = Seat::class;
+    protected static ?string $model = SeatTable::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
     protected static string|UnitEnum|null $navigationGroup = 'Event Management';
@@ -26,12 +26,12 @@ class SeatResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return SeatForm::configure($schema);
+        return SeatTableForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return SeatsTable::configure($table);
+        return SeatTablesTable::configure($table);
     }
 
     public static function getRelations(): array
@@ -44,9 +44,9 @@ class SeatResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListSeats::route('/'),
-            'create' => CreateSeat::route('/create'),
-            'edit' => EditSeat::route('/{record}/edit'),
+            'index' => ListSeatTables::route('/'),
+            'create' => CreateSeatTable::route('/create'),
+            'edit' => EditSeatTable::route('/{record}/edit'),
         ];
     }
 

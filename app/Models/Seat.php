@@ -8,6 +8,7 @@ class Seat extends Model
 {
     protected $fillable = [
         'event_id',
+        'table_id',
         'section',
         'row',
         'col',
@@ -23,5 +24,10 @@ class Seat extends Model
 
     public function assignment(){ 
         return $this->hasOne(SeatAssignment::class); 
+    }
+
+    public function table()
+    {
+        return $this->belongsTo(\App\Models\SeatTable::class, 'table_id');
     }
 }
