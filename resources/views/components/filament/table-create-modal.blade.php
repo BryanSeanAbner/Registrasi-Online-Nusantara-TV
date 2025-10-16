@@ -22,7 +22,7 @@
       />
     </x-filament::input.wrapper>
     @error('createTableForm.label')
-      <p class="fi-fo-field-wrp-error-message" style="margin-bottom: 12px;">{{ $message }}</p>
+      <p style="font-size: 11px; color: #ff6467;" style="margin-bottom: 12px;">{{ $message }}</p>
     @enderror
 
     <x-filament::input.wrapper 
@@ -42,7 +42,7 @@
       />
     </x-filament::input.wrapper>
     @error('createTableForm.capacity')
-      <p class="fi-fo-field-wrp-error-message">{{ $message }}</p>
+      <p style="font-size: 11px; color: #ff6467;">{{ $message }}</p>
     @enderror
 
     <x-slot name="footer">
