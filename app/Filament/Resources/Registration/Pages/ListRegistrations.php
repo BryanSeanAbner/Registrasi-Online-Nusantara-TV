@@ -31,7 +31,7 @@ class ListRegistrations extends ListRecords
             ->modalCancelAction(false)
             ->modalContent(function () {
                 $failed = DB::table('failed_jobs')->orderBy('failed_at', 'DESC')->take(10)->get();
-                return view('filament.components.failed-jobs-list', [
+                return view('components.failed-jobs-list', [
                     'failed' => $failed,
                 ]);
             }),
