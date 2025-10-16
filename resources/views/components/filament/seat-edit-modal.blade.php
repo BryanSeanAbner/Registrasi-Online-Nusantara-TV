@@ -7,7 +7,12 @@
   heading="Edit Kursi"
   wire:submit.prevent="saveSeat"
 >
-    <x-filament::input.wrapper prefix="Label" inline-prefix style="margin-bottom: 15px;">
+    <x-filament::input.wrapper 
+      prefix="Label" 
+      inline-prefix 
+      :valid="! $errors->has('seatForm.label')"
+      style="margin-bottom: 6px;"
+    >
       <x-filament::input
         id="seatLabel"
         type="text" 
@@ -15,14 +20,24 @@
         placeholder="cth: Garuda-1"
       />
     </x-filament::input.wrapper>
+    @error('seatForm.label')
+      <p class="fi-fo-field-wrp-error-message" style="margin-bottom: 12px;">{{ $message }}</p>
+    @enderror
 
-    <x-filament::input.wrapper prefix="Status" inline-prefix>
+    <x-filament::input.wrapper 
+      prefix="Status" 
+      inline-prefix 
+      :valid="! $errors->has('seatForm.status')"
+    >
       <x-filament::input.select id="seatStatus" wire:model.defer="seatForm.status">
         <option value="available">Tersedia</option>
         <option value="blocked">Diblok</option>
         <option value="maintenance">Maintenance</option>
       </x-filament::input.select>
     </x-filament::input.wrapper>
+    @error('seatForm.status')
+      <p class="fi-fo-field-wrp-error-message" style="margin-top: 6px;">{{ $message }}</p>
+    @enderror
 
     <x-slot name="footer">
       <div class="fi-modal-footer-actions">

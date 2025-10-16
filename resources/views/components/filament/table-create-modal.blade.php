@@ -7,7 +7,12 @@
   heading="Tambah Meja"
   wire:submit.prevent="saveCreateTable"
 >
-    <x-filament::input.wrapper prefix="Label Meja" inline-prefix style="margin-bottom: 15px;">
+    <x-filament::input.wrapper 
+      prefix="Label Meja" 
+      inline-prefix 
+      :valid="! $errors->has('createTableForm.label')"
+      style="margin-bottom: 6px;"
+    >
       <x-filament::input
         id="createTableLabel"
         type="text"
@@ -16,8 +21,16 @@
         autofocus
       />
     </x-filament::input.wrapper>
+    @error('createTableForm.label')
+      <p class="fi-fo-field-wrp-error-message" style="margin-bottom: 12px;">{{ $message }}</p>
+    @enderror
 
-    <x-filament::input.wrapper prefix="Kapasitas" inline-prefix>
+    <x-filament::input.wrapper 
+      prefix="Kapasitas" 
+      inline-prefix 
+      :valid="! $errors->has('createTableForm.capacity')"
+      style="margin-bottom: 6px;"
+    >
       <x-filament::input
         id="createTableCapacity"
         type="number"
@@ -28,6 +41,9 @@
         placeholder="cth: 10"
       />
     </x-filament::input.wrapper>
+    @error('createTableForm.capacity')
+      <p class="fi-fo-field-wrp-error-message">{{ $message }}</p>
+    @enderror
 
     <x-slot name="footer">
       <div class="fi-modal-footer-actions">

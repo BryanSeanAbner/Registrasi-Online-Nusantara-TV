@@ -98,6 +98,8 @@ class ManageSeating extends Page
 
     public function openSeatModal(int $seatId): void
     {
+        $this->resetErrorBag();
+        $this->resetValidation();
         $this->selectedSeatId = $seatId;
 
         $seat = Seat::with('assignment')
@@ -120,11 +122,19 @@ class ManageSeating extends Page
             return;
         }
 
-        $validated = $this->validate([
-            'seatForm.label' => ['required', 'string', 'max:255'],
-            'seatForm.section' => ['nullable', 'string', 'max:255'],
-            'seatForm.status' => ['required', 'in:available,blocked,maintenance'],
-        ]);
+        $validated = $this->validate(
+            [
+                'seatForm.label' => ['required', 'string', 'max:255'],
+                'seatForm.section' => ['nullable', 'string', 'max:255'],
+                'seatForm.status' => ['required', 'in:available,blocked,maintenance'],
+            ],
+            messages: [],
+            attributes: [
+                'seatForm.label' => 'label',
+                'seatForm.section' => 'section',
+                'seatForm.status' => 'status',
+            ]
+        );
 
         $seat = Seat::where('event_id', $this->activeEventId)
             ->findOrFail($this->selectedSeatId);
@@ -183,6 +193,8 @@ class ManageSeating extends Page
 
     public function openCreateTableModal(): void
     {
+        $this->resetErrorBag();
+        $this->resetValidation();
         $this->createTableForm = [
             'label' => '',
             'capacity' => null,
@@ -193,10 +205,17 @@ class ManageSeating extends Page
 
     public function saveCreateTable(): void
     {
-        $this->validate([
-            'createTableForm.label' => ['required', 'string', 'max:255'],
-            'createTableForm.capacity' => ['required', 'integer', 'min:1'],
-        ]);
+        $this->validate(
+            [
+                'createTableForm.label' => ['required', 'string', 'max:255'],
+                'createTableForm.capacity' => ['required', 'integer', 'min:1'],
+            ],
+            messages: [],
+            attributes: [
+                'createTableForm.label' => 'label',
+                'createTableForm.capacity' => 'capacity',
+            ]
+        );
 
         $eventId = (int) ($this->activeEventId ?? 0);
         if (! $eventId) {
@@ -212,15 +231,19 @@ class ManageSeating extends Page
 
         $created = 0; $skipped = 0;
         $prefix = (string) $table->label;
+
+        $resetEvery = $table->capacity < 7 ? ceil($table->capacity / 2) : 6;   
         for ($i = 1; $i <= (int) $table->capacity; $i++) {
+            $col = (($i - 1) % $resetEvery) + 1;
+            $row = ceil($i / $resetEvery);
             $label = $prefix . '-' . $i;
             $seat = Seat::firstOrCreate(
                 ['event_id' => $eventId, 'label' => $label],
                 [
                     'table_id' => $table->id,
                     'section'  => null,
-                    'row'      => null,
-                    'col'      => null,
+                    'row'      => $row,
+                    'col'      => $col,
                     'type'     => 'regular',
                     'status'   => 'available',
                 ]
@@ -344,13 +367,18 @@ class ManageSeating extends Page
             return;
         }
 
+        $nextIndex = $seatCount + 1;
+        $resetEvery = $capacity < 7 ? ceil($capacity / 2) : 6; 
+        $col = (($nextIndex - 1) % $resetEvery) + 1;
+        $row = ceil($nextIndex / $resetEvery);
+
         Seat::create([
             'event_id' => $eventId,
             'table_id' => $table->id,
             'label'    => $label,
             'section'  => null,
-            'row'      => null,
-            'col'      => null,
+            'row'      => $row,
+            'col'      => $col,
             'type'     => 'regular',
             'status'   => 'available',
         ]);
