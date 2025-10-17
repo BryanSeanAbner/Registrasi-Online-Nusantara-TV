@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitCode = async code => {
     if (!code) return;
     result.textContent = '⏳ Memeriksa...';
+    detail.innerHTML = '';
 
     const { ok, data } = await ajax('POST', `{{ route('scan.submit') }}`, { code });
     result.textContent = `${ok ? '✅' : '❌'} ${data?.msg ?? 'Gagal.'}`;
