@@ -6,6 +6,7 @@
   icon="heroicon-o-pencil-square"
   heading="Edit Kursi"
   wire:submit.prevent="saveSeat"
+  :autofocus="false"
 >
     <x-filament::input.wrapper 
       prefix="Label" 

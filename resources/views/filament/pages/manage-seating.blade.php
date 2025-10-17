@@ -7,6 +7,11 @@
 @endphp
 
 <div>
+  <style>
+    .fi-seat-disabled { pointer-events: none; }
+    .fi-seat-disabled * { cursor: progress !important; }
+    [x-cloak] { display: none !important; }
+  </style>
   <div style="display:flex; align-items:center; justify-content:space-between; margin-top:25px; margin-bottom:12px; flex-wrap:wrap; gap:12px;">
     <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
       @foreach ($legend as $item)
@@ -70,16 +75,18 @@
             @endphp
             <div 
               x-data="{ loading: false }"
-              x-on:click="loading = true; $wire.openSeatModal({{ $seat['id'] }})"
-              x-on:open-modal.window="loading = false"
+              x-on:click="loading = true"
+              wire:click="openSeatModal({{ $seat['id'] }})"
+              x-on:open-modal.window="if ($event.detail && $event.detail.id === 'edit-seat') loading = false"
               x-on:close-modal.window="loading = false"
+              wire:loading.class="fi-seat-disabled"
+              wire:target="openSeatModal"
               style="background: {{ $bg }}; color: {{ $color }}; text-align:center; padding:10px 8px; border-radius:8px; font-weight:600; cursor:pointer; position:relative;"
               title="Edit {{ $seat['label'] }}"
             >
               <span x-show="!loading">{{ $seat['label'] }}</span>
-              <span x-show="loading" style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
-                <x-filament::loading-indicator class="h-4 w-4" />
-                Loading
+              <span x-show="loading" x-cloak style="display: flex; align-items: center; justify-content: center; gap: 6px; vertical-align: middle">
+                Loading..
               </span>
             </div>
           @endforeach
@@ -104,16 +111,18 @@
             @endphp
             <div 
               x-data="{ loading: false }"
-              x-on:click="loading = true; $wire.openSeatModal({{ $seat['id'] }})"
-              x-on:open-modal.window="loading = false"
+              x-on:click="loading = true"
+              wire:click="openSeatModal({{ $seat['id'] }})"
+              x-on:open-modal.window="if ($event.detail && $event.detail.id === 'edit-seat') loading = false"
               x-on:close-modal.window="loading = false"
+              wire:loading.class="fi-seat-disabled"
+              wire:target="openSeatModal"
               style="background: {{ $bg }}; color: {{ $color }}; text-align:center; padding:10px 8px; border-radius:8px; font-weight:600; cursor:pointer; position:relative;"
               title="Edit {{ $seat['label'] }}"
             >
               <span x-show="!loading">{{ $seat['label'] }}</span>
-              <span x-show="loading" style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
-                <x-filament::loading-indicator class="h-4 w-4" />
-                Loading
+              <span x-show="loading" x-cloak style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; vertical-align: middle">
+                Loading..
               </span>
             </div>
           @endforeach
@@ -126,3 +135,4 @@
   <x-filament.seat-edit-modal id="edit-seat" />
   <x-filament.table-create-modal id="create-table" />
   <x-filament.confirm-delete-table-modal id="confirm-delete-table" :label="$selectedTableLabel" />
+</div>

@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const groupBySection = seats => {
       const g = {};
       seats.forEach(s => {
-        const key = s.section || '';
+        const key = s.section || s.table || '';
         (g[key] ??= []).push(s);
       });
       Object.keys(g).forEach(k => {
