@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class FormField extends Model
 {
-    use SoftDeletes;
+    // use SoftDeletes;
 
     protected $fillable = [
         'event_id','label','name','type',
