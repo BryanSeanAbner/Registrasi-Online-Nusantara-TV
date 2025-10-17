@@ -39,6 +39,13 @@ class ManageSeating extends Page
         'capacity' => null,
     ];
 
+    // Edit table modal state
+    public ?int $editingTableId = null;
+    public array $editTableForm = [
+        'label' => '',
+        'capacity' => null,
+    ];
+
     // Delete table confirmation state
     public ?int $selectedTableId = null;
     public ?string $selectedTableLabel = null;
@@ -257,6 +264,75 @@ class ManageSeating extends Page
         Notification::make()
             ->title('Meja dibuat')
             ->body("Kursi otomatis: Created {$created}" . ($skipped ? "\nSkipped (exists): {$skipped}" : ''))
+            ->success()
+            ->send();
+    }
+
+    public function openEditTableModal(int $tableId): void
+    {
+        $this->resetErrorBag();
+        $this->resetValidation();
+
+        $eventId = (int) ($this->activeEventId ?? 0);
+        if (! $eventId) {
+            Notification::make()->title('Tidak ada Event aktif')->danger()->send();
+            return;
+        }
+
+        $table = SeatTable::where('event_id', $eventId)->findOrFail($tableId);
+
+        $this->editingTableId = $table->id;
+        $this->editTableForm = [
+            'label' => (string) $table->label,
+            'capacity' => (int) ($table->capacity ?? 0),
+        ];
+
+        $this->dispatch('open-modal', id: 'edit-table');
+    }
+
+    public function saveEditTable(): void
+    {
+        $tableId = (int) ($this->editingTableId ?? 0);
+        if (! $tableId) { return; }
+
+        $validated = $this->validate(
+            [
+                'editTableForm.label' => ['required', 'string', 'max:255'],
+                'editTableForm.capacity' => ['required', 'integer', 'min:1'],
+            ],
+            messages: [],
+            attributes: [
+                'editTableForm.label' => 'label',
+                'editTableForm.capacity' => 'capacity',
+            ]
+        );
+
+        $eventId = (int) ($this->activeEventId ?? 0);
+        if (! $eventId) {
+            Notification::make()->title('Tidak ada Event aktif')->danger()->send();
+            return;
+        }
+
+        $table = SeatTable::withCount('seats')
+            ->where('event_id', $eventId)
+            ->findOrFail($tableId);
+
+        $newCapacity = (int) $this->editTableForm['capacity'];
+        if ($table->seats_count > $newCapacity) {
+            $this->addError('editTableForm.capacity', 'Kapasitas tidak boleh kurang dari jumlah kursi saat ini ('.$table->seats_count.').');
+            return;
+        }
+
+        $table->label = (string) $this->editTableForm['label'];
+        $table->capacity = $newCapacity;
+        $table->save();
+
+        $this->editingTableId = null;
+        $this->dispatch('close-modal', id: 'edit-table');
+        $this->loadData();
+
+        Notification::make()
+            ->title('Meja diperbarui')
             ->success()
             ->send();
     }

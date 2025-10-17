@@ -57,6 +57,11 @@
               :tooltip="$table['is_full'] ? 'Kapasitas meja penuh' : 'Tambah Kursi'"
             >Tambah Kursi</x-filament::button>
             <x-filament::button 
+              color="gray" 
+              icon="heroicon-o-pencil-square" 
+              wire:click="openEditTableModal({{ $table['id'] }})"
+            >Edit Meja</x-filament::button>
+            <x-filament::button 
               color="danger" 
               icon="heroicon-o-trash" 
               wire:click="openDeleteTableModal({{ $table['id'] }})"
@@ -133,6 +138,7 @@
 
 
   <x-filament.seat-edit-modal id="edit-seat" />
+  <x-filament.table-edit-modal id="edit-table" />
   <x-filament.table-create-modal id="create-table" />
   <x-filament.confirm-delete-table-modal id="confirm-delete-table" :label="$selectedTableLabel" />
 </div>
