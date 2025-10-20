@@ -138,7 +138,7 @@ class RegistrationsTable
                         ->color('danger')
                         ->icon('heroicon-m-trash')
                         ->requiresConfirmation()
-                        ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
+                        // ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
                         ->action(fn (Registration $r) => $r->delete()),
                 
                     Action::make('choose_seat')

@@ -50,12 +50,19 @@ class CreateManualRegistration extends Page
                 ...$this->dynamicFields(),
             ])
             ->statePath('data')
-            ->footer([
-                Action::make('save')
-                    ->label('Simpan Pendaftaran')
-                    ->color('primary')
-                    ->action('save'),
-            ]),
+            ->footer(
+                Schema::end([
+                    Action::make('save')
+                        ->label('Simpan Pendaftaran')
+                        ->color('primary')
+                        ->action('save'),
+
+                    Action::make('save_and_create_another')
+                        ->label('Simpan & Buat Lagi')
+                        ->color('gray')
+                        ->action('saveAndCreateAnother'),
+                ])
+            ),
         ]);
     }
 
@@ -64,7 +71,7 @@ class CreateManualRegistration extends Page
         return [
             ...[SchemaForm::make()
                 ->schema(fn (Get $get) => $this->buildEventComponents($get('event_id')))
-                ->statePath('data.answers')
+                ->statePath('answers')
                 ->columns(2)],
         ];
     }
@@ -164,11 +171,43 @@ class CreateManualRegistration extends Page
 
     public function save(RegistrationService $service): void
     {
+        $registration = $this->performSave($service);
+        if (! $registration) return;
+
+        redirect(RegistrationResource::getUrl('view', ['record' => $registration]));
+    }
+
+    public function saveAndCreateAnother(RegistrationService $service): void
+    {
+        $registration = $this->performSave($service);
+        if (! $registration) return;
+
+        $this->data['answers'] = [];
+
+        Notification::make()
+            ->title('Pendaftaran dibuat. Silakan tambah peserta lagi.')
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Shared save logic: validate & persist registration
+     */
+    private function performSave(RegistrationService $service)
+    {
         $eventId = (int) ($this->data['event_id'] ?? 0);
         $event = Event::find($eventId);
         if (! $event) {
             Notification::make()->title('Pilih event terlebih dahulu')->danger()->send();
-            return;
+            return null;
+        }
+
+        $rules = collect($service->buildValidationRules($event))
+            ->mapWithKeys(fn ($rule, $key) => ["data.answers.$key" => $rule])
+            ->all();
+
+        if (! empty($rules)) {
+            $this->validate($rules);
         }
 
         $answers = (array) ($this->data['answers'] ?? []);
@@ -180,6 +219,6 @@ class CreateManualRegistration extends Page
             ->success()
             ->send();
 
-        redirect(RegistrationResource::getUrl('view', ['record' => $registration]));
+        return $registration;
     }
 }
