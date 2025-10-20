@@ -17,6 +17,7 @@ services:
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
+      FORCE_HTTPS: "true"
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: 3306
@@ -81,19 +82,21 @@ services:
       DB_PASSWORD: laravel
     command: ["php", "artisan", "queue:work", "--tries=1", "--verbose", "--timeout=90"]
 
-  # Optional: vite for assets (uncomment to use dev server)
-  # vite:
-  #   image: node:20-alpine
-  #   container_name: registrasi-online-vite
-  #   working_dir: /var/www/html
-  #   volumes:
-  #     - ./:/var/www/html
-  #     - node_modules:/var/www/html/node_modules
-  #   command: sh -c "npm ci && npm run dev -- --host"
-  #   ports:
-  #     - "5173:5173"
-  #   depends_on:
-  #     - app
+  # Public HTTPS tunnel using ngrok (exposes nginx:80)
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: registrasi-online-ngrok
+    restart: unless-stopped
+    depends_on:
+      - nginx
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command: >-
+      start --all --config /etc/ngrok.yml --log=stdout
+    volumes:
+      - ./docker/ngrok.yml:/etc/ngrok.yml:ro
+    ports:
+      - "4040:4040"
 
 volumes:
   dbdata:
