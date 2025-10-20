@@ -31,6 +31,7 @@ if [ "${DB_CONNECTION:-mysql}" = "mysql" ]; then
   done
   echo "MySQL is up. Running migrations..."
   php artisan migrate --force || true
+  php artisan queue:work --tries=1 --timeout=60 || true
 fi
 
 # Ensure storage symlink
