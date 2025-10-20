@@ -12,6 +12,8 @@ RUN apt-get update \
         libonig-dev \
         libxml2-dev \
         libicu-dev \
+        imagemagick \
+        libmagickwand-dev \
         curl \
         ca-certificates \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -25,6 +27,8 @@ RUN apt-get update \
         mbstring \
         dom \
         intl \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
