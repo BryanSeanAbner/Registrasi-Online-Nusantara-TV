@@ -34,7 +34,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_MEMORY_LIMIT=-1
 
-WORKDIR /var/www/html
+WORKDIR /www/registrasi-online
 
 # Leverage Docker build cache: first copy composer files and install deps
 COPY composer.json composer.lock ./

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -e
 
-cd /var/www/html
+cd /www/registrasi-online
 
 # Ensure default .env exists
 if [ ! -f .env ] && [ -f .env.example ]; then
