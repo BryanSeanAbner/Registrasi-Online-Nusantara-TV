@@ -1,4 +1,11 @@
-FROM php:8.2-fpm
+# syntax=docker/dockerfile:1.4
+
+# Allow switching base images (e.g., use ECR Public mirrors)
+ARG PHP_IMAGE=public.ecr.aws/docker/library/php:8.2-fpm
+ARG COMPOSER_IMAGE=public.ecr.aws/docker/library/composer:2
+
+FROM ${COMPOSER_IMAGE} AS composer
+FROM ${PHP_IMAGE}
 
 # Install system dependencies and PHP extensions
 RUN apt-get update \
@@ -32,7 +39,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 # Composer environment tweaks
 ENV COMPOSER_ALLOW_SUPERUSER=1 \

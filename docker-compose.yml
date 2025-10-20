@@ -1,10 +1,11 @@
-version: "3.9"
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        PHP_IMAGE: "${PHP_IMAGE:-public.ecr.aws/docker/library/php:8.2-fpm}"
+        COMPOSER_IMAGE: "${COMPOSER_IMAGE:-public.ecr.aws/docker/library/composer:2}"
     image: registrasi-online-php
     container_name: registrasi-online-app
     restart: unless-stopped
@@ -21,7 +22,7 @@ services:
         condition: service_healthy
 
   nginx:
-    image: nginx:1.25-alpine
+    image: ${NGINX_IMAGE:-public.ecr.aws/docker/library/nginx:1.25-alpine}
     container_name: registrasi-online-nginx
     restart: unless-stopped
     depends_on:
@@ -33,7 +34,7 @@ services:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
 
   mysql:
-    image: mysql:8.0
+    image: ${MYSQL_IMAGE:-public.ecr.aws/docker/library/mysql:8.0}
     container_name: registrasi-online-mysql
     restart: unless-stopped
     ports:
