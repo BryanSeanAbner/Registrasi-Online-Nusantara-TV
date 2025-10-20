@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.4
-
 # Allow switching base images (e.g., use ECR Public mirrors)
 ARG PHP_IMAGE=public.ecr.aws/docker/library/php:8.2-fpm
 ARG COMPOSER_IMAGE=public.ecr.aws/docker/library/composer:2
