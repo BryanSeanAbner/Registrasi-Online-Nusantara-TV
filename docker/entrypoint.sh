@@ -31,8 +31,12 @@ if [ "${DB_CONNECTION:-mysql}" = "mysql" ]; then
   done
   echo "MySQL is up. Running migrations..."
   php artisan migrate --force || true
-  php artisan queue:work --tries=1 --timeout=60 || true
 fi
+
+# Always run a background queue worker in the app container
+echo "Starting background queue worker in app container..."
+: "${QUEUE_WORKER_ARGS:=--tries=1 --timeout=60}"
+nohup php artisan queue:work $QUEUE_WORKER_ARGS > storage/logs/queue-worker.log 2>&1 &
 
 # Ensure storage symlink
 php artisan storage:link >/dev/null 2>&1 || true

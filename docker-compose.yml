@@ -17,6 +17,12 @@ services:
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: filament_test
+      DB_USERNAME: laravel
+      DB_PASSWORD: laravel
     depends_on:
       mysql:
         condition: service_healthy
@@ -66,6 +72,13 @@ services:
     volumes:
       - ./:/www/registrasi-online
       - vendor:/www/registrasi-online/vendor
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: filament_test
+      DB_USERNAME: laravel
+      DB_PASSWORD: laravel
     command: ["php", "artisan", "queue:work", "--tries=1", "--verbose", "--timeout=90"]
 
   # Optional: vite for assets (uncomment to use dev server)
