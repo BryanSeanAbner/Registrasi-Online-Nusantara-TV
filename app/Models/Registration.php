@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Registration extends Model
 {
@@ -36,5 +37,15 @@ class Registration extends Model
     public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Registration $registration) {
+            if ($registration->code) {
+                $path = "qrcodes/{$registration->code}.png";
+                Storage::disk('public')->delete($path);
+            }
+        });
     }
 }
