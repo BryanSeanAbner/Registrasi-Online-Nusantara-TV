@@ -233,7 +233,7 @@ class RegistrationApprovalService
 
         $template = (string) data_get($event, 'brand.wa_template');
         if (blank($template)) {
-            $template = "Selamat, {name}!\n\nPendaftaran kamu telah DISETUJUI.\n\nAcara: {event}\Lokasi: {location}\nKode Tiket: {code}\n\nSimpan kode ini dan tunjukkan QR Code saat check-in di lokasi.\nSampai jumpa di acara!";
+            $template = "Selamat, {name}!\n\nPendaftaran kamu telah DISETUJUI.\n\nAcara: {event}\nLokasi: {location}\nKode Tiket: {code}\n\nSimpan kode ini dan tunjukkan QR Code saat check-in di lokasi.\nSampai jumpa di acara!";
         }
         $msg = strtr($template, [
             '{name}'        => (string) $name,
