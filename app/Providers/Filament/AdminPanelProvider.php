@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->globalSearch(false)
             ->databaseNotifications()
             ->databaseNotificationsPolling('15s')
-            ->login()
+            ->login(\App\Filament\Auth\Login::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
