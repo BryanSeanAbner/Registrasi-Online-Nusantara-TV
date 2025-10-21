@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\User\Tables;
 
+use Dom\Text;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
@@ -16,6 +17,10 @@ class UsersTable
             ->modifyQueryUsing(fn ($query) => $query->where('role', 'admin'))
             ->columns([
                 TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('username')
+                    ->label('Username')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
