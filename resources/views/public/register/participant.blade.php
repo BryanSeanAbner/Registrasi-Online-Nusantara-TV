@@ -57,7 +57,7 @@
                 $tz = config('app.timezone', 'Asia/Jakarta');
               @endphp
               <tr class="hover:bg-gray-50">
-                <td class="px-6 py-3 text-sm lg:text-base 2xl:text-lg text-gray-500">{{ $registrations->firstItem() + $i }}</td>
+                <td class="px-6 py-3 text-sm lg:text-base 2xl:text-lg text-gray-500">{{ $i + 1 }}</td>
                 <td class="px-6 py-3 text-sm lg:text-base 2xl:text-lg font-medium text-gray-900">{{ $derivedName ?: '-' }}</td>
                 <td class="px-6 py-3 text-sm lg:text-base 2xl:text-lg text-gray-900">
                   @if($photoPath)
@@ -74,25 +74,80 @@
         </div>
       </div>
       
-      <!-- Pagination -->
-      @if($registrations->hasPages())
-        <div class="mt-6 flex items-center justify-between">
-          <div class="text-sm lg:text-base 2xl:text-lg text-gray-700">
-            Menampilkan 
-            <span class="font-medium">{{ $registrations->firstItem() }}</span>
-            sampai 
-            <span class="font-medium">{{ $registrations->lastItem() }}</span>
-            dari 
-            <span class="font-medium">{{ $registrations->total() }}</span>
-            hasil
-          </div>
-          
-          <div class="flex items-center space-x-2">
-            {{ $registrations->links() }}
-          </div>
-        </div>
-      @endif
     @endif
   </div>
 </section>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const tbody = document.querySelector('table tbody');
+    if (!tbody) return;
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const pageSize = 5; // jumlah baris per tampilan
+    let startIndex = 0;
+
+      // Siapkan transition untuk animasi
+      rows.forEach((row) => {
+        row.style.transition = 'transform 450ms ease, opacity 450ms ease';
+        row.style.willChange = 'transform, opacity';
+      });
+
+      function showSlice(start) {
+        rows.forEach((row, idx) => {
+          const visible = idx >= start && idx < start + pageSize;
+          row.style.display = visible ? '' : 'none';
+          if (visible) {
+            row.style.opacity = '1';
+            row.style.transform = 'translateX(0)';
+          }
+        });
+      }
+
+    // Tampilkan awal
+    showSlice(startIndex);
+
+      if (rows.length > pageSize) {
+        setInterval(() => {
+          // batch saat ini
+          const currentStart = startIndex;
+          const currentEnd = Math.min(currentStart + pageSize, rows.length);
+          const currentRows = rows.slice(currentStart, currentEnd);
+
+          // hitung batch berikutnya
+          startIndex += pageSize;
+          if (startIndex >= rows.length) {
+            startIndex = 0; // kembali ke awal
+          }
+
+          // animasi keluar ke kanan
+          currentRows.forEach((row) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(40px)';
+          });
+
+          // setelah keluar, tampilkan batch berikut masuk dari kiri
+          setTimeout(() => {
+            currentRows.forEach((row) => {
+              row.style.display = 'none';
+            });
+
+            const nextStart = startIndex;
+            const nextEnd = Math.min(nextStart + pageSize, rows.length);
+            const nextRows = rows.slice(nextStart, nextEnd);
+            nextRows.forEach((row) => {
+              row.style.display = '';
+              row.style.opacity = '0';
+              row.style.transform = 'translateX(-40px)';
+            });
+
+            requestAnimationFrame(() => {
+              nextRows.forEach((row) => {
+                row.style.opacity = '1';
+                row.style.transform = 'translateX(0)';
+              });
+            });
+          }, 480); // ~durasi animasi keluar
+        }, 5000); // ganti setiap 5 detik
+      }
+  });
+</script>
 @endsection
