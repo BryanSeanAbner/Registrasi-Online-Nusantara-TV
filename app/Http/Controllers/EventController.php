@@ -50,8 +50,8 @@ class EventController extends Controller
         $registrations = Registration::with(['values.field'])
             ->where('event_id', $event->id)
             ->orderByDesc('created_at')
-            ->get();
-        $total = $registrations->count();
+            ->paginate(50);
+        $total = $registrations->total();
 
         return view('public.register.participant', compact('event','registrations','total'));
     }

@@ -56,7 +56,7 @@
                 $tz = config('app.timezone', 'Asia/Jakarta');
               @endphp
               <tr class="hover:bg-gray-50">
-                <td class="px-6 py-3 text-sm text-gray-500">{{ $i + 1 }}</td>
+                <td class="px-6 py-3 text-sm text-gray-500">{{ $registrations->firstItem() + $i }}</td>
                 <td class="px-6 py-3 text-sm font-medium text-gray-900">{{ $derivedName ?: '-' }}</td>
                 <td class="px-6 py-3 text-sm text-gray-900">
                   @if($photoPath)
@@ -71,6 +71,25 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Pagination -->
+      @if($registrations->hasPages())
+        <div class="mt-6 flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            Menampilkan 
+            <span class="font-medium">{{ $registrations->firstItem() }}</span>
+            sampai 
+            <span class="font-medium">{{ $registrations->lastItem() }}</span>
+            dari 
+            <span class="font-medium">{{ $registrations->total() }}</span>
+            hasil
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            {{ $registrations->links() }}
+          </div>
+        </div>
+      @endif
     @endif
   </div>
 </section>
