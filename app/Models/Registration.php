@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class Registration extends Model
 {
-    protected $fillable = ['event_id','code','status','checked_in_at'];
+    protected $fillable = ['event_id','code','status','checked_in_at','approved_by'];
     protected $casts   = ['checked_in_at' => 'datetime'];
 
     public const ST_PENDING  = 'pending';
@@ -32,4 +33,19 @@ class Registration extends Model
     public function seatAssignment() {
     return $this->hasOne(\App\Models\SeatAssignment::class);
 }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Registration $registration) {
+            if ($registration->code) {
+                $path = "qrcodes/{$registration->code}.png";
+                Storage::disk('public')->delete($path);
+            }
+        });
+    }
 }

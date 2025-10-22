@@ -11,7 +11,8 @@ class SeatService
 {
     public function map(Event $event, int $registrationId): array
     {
-        return Seat::where('event_id', $event->id)
+        return Seat::with(['assignment', 'table'])
+            ->where('event_id', $event->id)
             ->get()
             ->map(function (Seat $s) use ($registrationId) {
                 $assignment = $s->assignment;
@@ -24,6 +25,7 @@ class SeatService
                     'row'     => $s->row,
                     'col'     => $s->col,
                     'status'  => $s->status,
+                    'table'   => $s->table->label ?? null,
                     'taken'   => (bool) $takenByOther,
                 ];
             })->all();

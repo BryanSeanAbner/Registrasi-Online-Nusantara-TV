@@ -8,9 +8,9 @@ use App\Services\SeatService;
 
 class SeatController extends Controller
 {
-    public function __construct(protected SeatService $seats)
-    {
-    }
+    public function __construct(
+        protected SeatService $seats
+    ) {}
 
     public function map(Request $req, Event $event)
     {

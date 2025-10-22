@@ -23,9 +23,11 @@ class FormFieldsTable
         ->columns([
             TextColumn::make('event.title')->label('Event'),
             TextColumn::make('label')->searchable(),
-            TextColumn::make('name'),
+            // TextColumn::make('name'),
             TextColumn::make('type'),
             IconColumn::make('is_required')->boolean(),
+            IconColumn::make('show_in_scan')->boolean(),
+            IconColumn::make('show_in_form')->boolean(),
             TextColumn::make('sort_order')->sortable(),
             TextColumn::make('updated_at')->dateTime(),
         ])

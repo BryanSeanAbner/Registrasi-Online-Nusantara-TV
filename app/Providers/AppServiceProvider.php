@@ -8,6 +8,7 @@ use App\Repositories\Eloquent\EloquentEventRepository;
 use App\Repositories\Contracts\FormFieldRepositoryInterface;
 use App\Repositories\Eloquent\EloquentFormFieldRepository;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +27,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        // Force HTTPS if configured
+        // if (filter_var((string) env('FORCE_HTTPS', false), FILTER_VALIDATE_BOOL)) {
+        //     URL::forceScheme('https');
+        // }
     }
 }

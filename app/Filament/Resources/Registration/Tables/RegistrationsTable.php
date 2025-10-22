@@ -9,10 +9,13 @@ use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Maatwebsite\Excel\Facades\Excel;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -50,11 +53,19 @@ class RegistrationsTable
                     })
                     ->grow(),
             ])
-            // Do not persist filters so active_event_id changes take effect immediately
             ->persistSearchInSession()
             ->recordUrl(null)
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
+                    BulkAction::make('export')
+                        ->label('Export Excel')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->action(function (Collection $records) {
+                            return Excel::download(
+                                new \App\Exports\RegistrationsExport($records),
+                                'registrations-' . now()->format('Y-m-d') . '.xlsx'
+                            );
+                        }),
                     BulkAction::make('bulkApprove')
                         ->label('Approve Terpilih')
                         ->icon('heroicon-o-check-badge')
@@ -127,7 +138,7 @@ class RegistrationsTable
                         ->color('danger')
                         ->icon('heroicon-m-trash')
                         ->requiresConfirmation()
-                        ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
+                        // ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
                         ->action(fn (Registration $r) => $r->delete()),
                 
                     Action::make('choose_seat')
@@ -166,6 +177,57 @@ class RegistrationsTable
                         ->action(function ($record) {
                             app(RegistrationApprovalService::class)->resendWa($record);
                         }),
+
+                    // Action::make('send_custom_wa')
+                    //     ->label('Kirim WA Custom')
+                    //     ->icon('heroicon-o-chat-bubble-left-right')
+                    //     ->color('success')
+                    //     ->form([
+                    //         Textarea::make('message')
+                    //             ->label('Pesan')
+                    //             ->required()
+                    //             ->rows(6)
+                    //             ->placeholder("Halo {name}, info acara {event} di {location} pada {date}. Kode: {code}"),
+                    //         Toggle::make('include_qr')
+                    //             ->label('Sertakan link QR tiket')
+                    //             ->default(true),
+                    //     ])
+                    //     ->action(function (Registration $record, array $data) {
+                    //         $event = $record->event;
+                    //         $name  = app(\App\Services\RegistrationApprovalService::class)->getParticipantName($record) ?? '';
+                    //         $msg   = strtr((string) $data['message'], [
+                    //             '{name}'     => (string) $name,
+                    //             '{event}'    => (string) ($event->title ?? ''),
+                    //             '{location}' => (string) ($event->venue ?? ''),
+                    //             '{code}'     => (string) ($record->code ?? ''),
+                    //             '{date}'     => optional($event->starts_at)?->format('d M Y H:i') ?? '',
+                    //         ]);
+
+                    //         $qrUrl = null;
+                    //         if (($data['include_qr'] ?? true) && $record->code) {
+                    //             $qrUrl = env('WA_LINK_IMG')
+                    //                 ? env('WA_LINK_IMG') . "/t/{$record->code}/qrcode/preview"
+                    //                 : url("/t/{$record->code}/qrcode/preview");
+                    //         }
+
+                    //         // Log ke wa_messages untuk tracking
+                    //         $msgRow = \App\Models\WaMessage::create([
+                    //             'blast_id'        => null,
+                    //             'event_id'        => (int) $record->event_id,
+                    //             'registration_id' => (int) $record->id,
+                    //             'phone'           => app(\App\Services\RegistrationApprovalService::class)->getParticipantPhone($record) ?? null,
+                    //             'code'            => (string) ($record->code ?? ''),
+                    //             'status'          => 'queued',
+                    //         ]);
+
+                    //         dispatch(new \App\Jobs\SendCustomWaMessageJob($record, $msg, $qrUrl, $msgRow->id));
+
+                    //         Notification::make()
+                    //             ->title('WA dijadwalkan')
+                    //             ->body('Pesan WA telah dijadwalkan untuk peserta ini.')
+                    //             ->success()
+                    //             ->send();
+                    //     }),
                 ]),
             ]);
     }
@@ -185,6 +247,10 @@ class RegistrationsTable
                     'rejected' => 'danger',
                 })
                 ->searchable(),
+            TextColumn::make('approver.name')
+                ->label('Approved By')
+                ->toggleable()
+                ->sortable(),
             TextColumn::make('code')->copyable()->searchable(),
             ImageColumn::make('qr_code')
                 ->label('QR Code')
@@ -204,4 +270,3 @@ class RegistrationsTable
         ];
     }
 }
-
