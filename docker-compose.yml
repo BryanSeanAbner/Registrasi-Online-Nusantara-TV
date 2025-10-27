@@ -18,12 +18,17 @@ services:
       APP_ENV: local
       APP_DEBUG: "true"
       FORCE_HTTPS: "true"
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: filament_test
-      DB_USERNAME: laravel
-      DB_PASSWORD: laravel
+      # Prevent automatic composer install/migrations on restart
+      COMPOSER_INSTALL_ON_START: "never"
+      MIGRATE_ON_START: "false"
+      # Do not run queue worker inside app container (use service `queue`)
+      QUEUE_WORKER_IN_APP: "false"
+      DB_CONNECTION: ${DB_CONNECTION}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       mysql:
         condition: service_healthy
@@ -47,10 +52,10 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: filament_test
-      MYSQL_USER: laravel
-      MYSQL_PASSWORD: laravel
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - dbdata:/var/lib/mysql
     healthcheck:
@@ -74,12 +79,12 @@ services:
       - ./:/www/registrasi-online
       - vendor:/www/registrasi-online/vendor
     environment:
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: filament_test
-      DB_USERNAME: laravel
-      DB_PASSWORD: laravel
+      DB_CONNECTION: ${DB_CONNECTION}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     command: ["php", "artisan", "queue:work", "--tries=1", "--verbose", "--timeout=90"]
 
   # Public HTTPS tunnel using ngrok (exposes nginx:80)
@@ -100,5 +105,7 @@ services:
 
 volumes:
   dbdata:
+    name: registrasi-online-dbdata
   vendor:
+    name: registrasi-online-vendor
   node_modules:
