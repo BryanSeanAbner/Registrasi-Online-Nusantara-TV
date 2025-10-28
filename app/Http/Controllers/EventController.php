@@ -28,17 +28,8 @@ class EventController extends Controller
 
     public function participants(string $slug)
     {
-        $event = Event::whereSlug($slug)
-            ->where('is_published', true)
-            ->firstOrFail();
-
-        $registrations = Registration::with(['values.field'])
-            ->where('event_id', $event->id)
-            ->orderByDesc('created_at')
-            ->get();
-        $total = $registrations->count();
-
-        return view('public.register.participant', compact('event','registrations','total'));
+        $event = $this->events->findPublishedBySlug($slug);
+        return $this->participantsViewFor($event);
     }
 
     public function participantsLatest()
@@ -46,14 +37,19 @@ class EventController extends Controller
         $event = Event::where('is_published', true)
             ->orderByDesc('starts_at')
             ->firstOrFail();
+        return $this->participantsViewFor($event);
+    }
 
+    private function participantsViewFor(Event $event)
+    {
         $registrations = Registration::with(['values.field'])
             ->where('event_id', $event->id)
+            ->where('checked_in_at', '!=', null)
             ->orderByDesc('created_at')
             ->get();
         $total = $registrations->count();
 
-        return view('public.register.participant', compact('event','registrations','total'));
+        return view('public.register.participant', compact('event', 'registrations', 'total'));
     }
 
     public function eventImage(string $img)
