@@ -7,7 +7,6 @@
             $label = $fv->field->label ?: \Illuminate\Support\Str::title(str_replace('_', ' ', (string)($fv->field->name ?? '')));
             $value = (string) ($fv->value ?? '');
 
-            // Jika field tipe image, tampilkan link "View Foto" ke route event.image
             if (($fv->field->type ?? null) === 'image' && $value !== '') {
                 $path = ltrim($value, '/');
                 $html = '<a href="' . e(route('event.image', $path)) . '" target="_blank" rel="noopener">View Foto</a>';

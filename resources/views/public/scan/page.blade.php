@@ -52,11 +52,21 @@ document.addEventListener('DOMContentLoaded', () => {
     detail.innerHTML = '';
 
     const { ok, data } = await ajax('POST', `{{ route('scan.submit') }}`, { code });
-    result.textContent = `${ok ? '✅' : '❌'} ${data?.msg ?? 'Gagal.'}`;
-    result.className = `mt-4 whitespace-pre-wrap rounded-md p-3 text-sm ${
-      ok ? 'bg-green-50 text-green-700 border border-green-200'
-         : 'bg-red-50 text-red-700 border border-red-200'
-    }`;
+    
+    if (ok) {
+      // Tampilkan animasi check untuk sukses
+      const timestamp = new Date().getTime();
+      result.innerHTML = `
+        <div class="flex items-center justify-center mb-2">
+          <img src="/api/check-animation?t=${timestamp}" alt="Success" class="w-16 h-16" />
+        </div>
+        <div class="text-center">${data?.msg ?? 'Berhasil!'}</div>
+      `;
+      result.className = `mt-4 whitespace-pre-wrap rounded-md p-3 text-sm bg-green-50 text-green-700 border border-green-200`;
+    } else {
+      result.textContent = `❌ ${data?.msg ?? 'Gagal.'}`;
+      result.className = `mt-4 whitespace-pre-wrap rounded-md p-3 text-sm bg-red-50 text-red-700 border border-red-200`;
+    }
 
     if (ok && data.code) {
       

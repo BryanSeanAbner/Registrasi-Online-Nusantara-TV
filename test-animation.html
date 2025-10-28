@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Animasi Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f3f4f6;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .animation-container {
+            margin: 2rem 0;
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Animasi Check</h1>
+        <p>Klik tombol di bawah untuk memuat ulang animasi:</p>
+        
+        <div class="animation-container">
+            <img id="animation" src="/api/check-animation" alt="Success Animation" style="width: 120px; height: 120px;" />
+        </div>
+        
+        <button onclick="reloadAnimation()">Reload Animasi</button>
+        
+        <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+            Animasi seharusnya menampilkan lingkaran hijau yang terisi dengan centang putih di dalamnya.
+        </p>
+    </div>
+
+    <script>
+        function reloadAnimation() {
+            const img = document.getElementById('animation');
+            const timestamp = new Date().getTime();
+            img.src = `/api/check-animation?t=${timestamp}`;
+        }
+        
+        // Auto reload setiap 3 detik untuk testing
+        setInterval(reloadAnimation, 3000);
+    </script>
+</body>
+</html>
