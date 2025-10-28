@@ -12,9 +12,18 @@ class CheckAnimationController extends Controller
     .circle { fill: none; stroke: #22c55e; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 314; stroke-dashoffset: 314; animation: drawCircle 0.6s ease-out forwards; transform-origin: 60px 60px; }
     .check  { fill: none; stroke: #ffffff; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 50; stroke-dashoffset: 50; animation: drawCheck 0.45s ease-out 0.5s forwards; }
     .bg    { fill: #22c55e; opacity: 0; animation: fadeInBg 0.2s ease-out 0.5s forwards; }
-    @keyframes drawCircle { to { stroke-dashoffset: 0; } }
-    @keyframes drawCheck { to { stroke-dashoffset: 0; } }
-    @keyframes fadeInBg { to { opacity: 1; } }
+    @keyframes drawCircle { 
+      0% { stroke-dashoffset: 314; }
+      100% { stroke-dashoffset: 0; } 
+    }
+    @keyframes drawCheck { 
+      0% { stroke-dashoffset: 50; }
+      100% { stroke-dashoffset: 0; } 
+    }
+    @keyframes fadeInBg { 
+      0% { opacity: 0; }
+      100% { opacity: 1; } 
+    }
   </style>
 
   <circle class="bg" cx="60" cy="60" r="52"/>
@@ -23,6 +32,10 @@ class CheckAnimationController extends Controller
 </svg>
 SVG;
 
-        return response($svg, 200)->header('Content-Type', 'image/svg+xml');
+        return response($svg, 200)
+            ->header('Content-Type', 'image/svg+xml')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }
