@@ -2,7 +2,7 @@
 
 @section('content')
 <section class="px-4 py-12">
-  <div class="mx-auto w-full max-w-5xl">
+  <div class="mx-auto w-full max-w-7xl 2xl:max-w-screen-2xl">
     <div class="mb-6 flex items-start justify-between">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Peserta Event</h1>
@@ -49,8 +49,9 @@
       <p class="text-gray-600">Belum ada peserta terdaftar.</p>
     @else
       <!-- Tabel responsif -->
-      <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table class="min-w-full divide-y divide-gray-200">
+      <div class="overflow-x-auto">
+        <div class="min-w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">#</th>
@@ -78,8 +79,10 @@
               @endforeach
             </tr>
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
+      
     @endif
   </div>
 </section>
