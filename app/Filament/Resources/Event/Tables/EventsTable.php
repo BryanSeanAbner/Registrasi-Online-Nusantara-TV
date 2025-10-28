@@ -8,6 +8,7 @@ use App\Models\Registration;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -29,42 +30,45 @@ class EventsTable
             ])
             ->recordUrl(null)
             ->recordActions([
-                Action::make('view')
-                    ->icon('heroicon-o-eye')
-                    ->label('View')
-                    ->url(fn (Event $e) => route('event.show', $e->slug))->openUrlInNewTab(),
-                Action::make('edit')
-                    ->icon('heroicon-m-pencil-square')
-                    ->label('Edit')
-                    ->url(fn (Event $e) => static::getResourceUrl('edit', $e)),
-                Action::make('blast_wa_reminder')
-                    ->icon('heroicon-o-paper-airplane')
-                    ->label('Blast WA Reminder')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->modalHeading('Kirim Reminder WA ke peserta approved?')
-                    ->modalDescription('Pesan akan dikirim ke semua pendaftar yang statusnya Approved pada event ini.')
-                    ->form([
-                        Textarea::make('message')
-                            ->label('Pesan')
-                            ->required()
-                            ->rows(6)
-                            ->placeholder("Contoh: Halo {name}, ini pengingat acara {event} di {location} pada {date}. Mohon hadir 15 menit lebih awal. Terima kasih."),
-                    ])
-                    ->action(function (Event $event, array $data) {
-                        /** @var ReminderBlastService $svc */
-                        $svc = app(ReminderBlastService::class);
-                        $result = $svc->blast($event, (string) $data['message'], (bool) (false));
-
-                        $notif = \Filament\Notifications\Notification::make()
-                            ->title('Blast WA dijadwalkan')
-                            ->body("Total: {$result['total']}\nDikirim: {$result['dispatched']}")
-                            ->success()
-                            ->persistent();
-
-                        $notif->send();
-                        try { $notif->sendToDatabase(Auth::user()); } catch (\Throwable) {}
-                    }),
+                ActionGroup::make([
+                    Action::make('view')
+                        ->icon('heroicon-o-eye')
+                        ->label('View')
+                        ->url(fn (Event $e) => route('event.show', $e->slug))->openUrlInNewTab(),
+                    Action::make('edit')
+                        ->icon('heroicon-m-pencil-square')
+                        ->label('Edit')
+                        ->color('warning')
+                        ->url(fn (Event $e) => static::getResourceUrl('edit', $e)),
+                    Action::make('blast_wa_reminder')
+                        ->icon('heroicon-o-paper-airplane')
+                        ->label('Blast WA Reminder')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalHeading('Kirim Reminder WA ke peserta approved?')
+                        ->modalDescription('Pesan akan dikirim ke semua pendaftar yang statusnya Approved pada event ini.')
+                        ->form([
+                            Textarea::make('message')
+                                ->label('Pesan')
+                                ->required()
+                                ->rows(6)
+                                ->placeholder("Contoh: Halo {name}, ini pengingat acara {event} di {location} pada {date}. Mohon hadir 15 menit lebih awal. Terima kasih."),
+                        ])
+                        ->action(function (Event $event, array $data) {
+                            /** @var ReminderBlastService $svc */
+                            $svc = app(ReminderBlastService::class);
+                            $result = $svc->blast($event, (string) $data['message'], (bool) (false));
+    
+                            $notif = \Filament\Notifications\Notification::make()
+                                ->title('Blast WA dijadwalkan')
+                                ->body("Total: {$result['total']}\nDikirim: {$result['dispatched']}")
+                                ->success()
+                                ->persistent();
+    
+                            $notif->send();
+                            try { $notif->sendToDatabase(Auth::user()); } catch (\Throwable) {}
+                        }),
+                ])
             ]);
     }
 
