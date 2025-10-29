@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Registration;
 use App\Models\Scan;
+use App\Events\RegistrationCheckedIn;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -72,6 +73,13 @@ class ScanService
             ]);
         });
 
+        event(new RegistrationCheckedIn(
+            registrationId: $reg->id,
+            eventId: $reg->event_id,
+            checkedInAt: optional($reg->checked_in_at)->toIso8601String(),
+            code: $reg->code,
+        ));
+
         return [
             'status' => 200,
             'payload' => [
@@ -95,4 +103,3 @@ class ScanService
         return view('public.scan.partials.detail', compact('reg'))->render();
     }
 }
-
