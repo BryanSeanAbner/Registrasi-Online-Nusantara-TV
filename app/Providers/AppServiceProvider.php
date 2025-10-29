@@ -8,6 +8,7 @@ use App\Repositories\Eloquent\EloquentEventRepository;
 use App\Repositories\Contracts\FormFieldRepositoryInterface;
 use App\Repositories\Eloquent\EloquentFormFieldRepository;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 use Carbon\Carbon;
 
@@ -34,6 +35,13 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
         
+        // Dynamically set the URL for the public_event disk
+        if (app()->runningInConsole()) {
+            Config::set('filesystems.disks.public_event.url', rtrim(config('app.url'), '/') . '/images');
+        } else {
+            Config::set('filesystems.disks.public_event.url', url('/images'));
+        }
+
         Carbon::setLocale('id');
     }
 }

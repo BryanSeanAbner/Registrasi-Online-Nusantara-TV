@@ -36,8 +36,12 @@
                       ->filter(fn ($fv) => $fv->field && $fv->field->event_id === $reg->event_id)
                       ->map(fn ($fv) => $fv->field);
               })
+              ->filter(fn ($field) => (bool) ($field->show_in_participant ?? true))
               ->unique(fn ($field) => $field->id)
+              ->sortBy(fn ($field) => $field->sort_order ?? PHP_INT_MAX)
           : ($event->formFields ?? collect())
+              ->filter(fn ($field) => (bool) ($field->show_in_participant ?? true))
+              ->sortBy(fn ($field) => $field->sort_order ?? PHP_INT_MAX)
       )
       ->map(function ($field) {
           $label = $field->label ?: \Illuminate\Support\Str::title(str_replace('_', ' ', (string)($field->name ?? '')));

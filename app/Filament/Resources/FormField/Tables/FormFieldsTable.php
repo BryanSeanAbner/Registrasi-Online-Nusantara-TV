@@ -27,7 +27,8 @@ class FormFieldsTable
             TextColumn::make('type'),
             IconColumn::make('is_required')->boolean(),
             IconColumn::make('show_in_scan')->boolean(),
-            IconColumn::make('show_in_form')->boolean(),
+            IconColumn::make('show_in_participant')->boolean(),
+            // IconColumn::make('show_in_form')->boolean(),
             TextColumn::make('sort_order')->sortable(),
             TextColumn::make('updated_at')->dateTime(),
         ])

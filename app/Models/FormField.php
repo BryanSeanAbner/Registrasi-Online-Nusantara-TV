@@ -13,7 +13,7 @@ class FormField extends Model
     protected $fillable = [
         'event_id','label','name','type',
         'is_required','is_toggleable','is_hidden_by_default',
-        'show_in_scan','show_in_form','sort_order',
+        'show_in_scan','show_in_form','show_in_participant','sort_order',
         'placeholder','help_text','meta',
     ];
 
@@ -23,6 +23,7 @@ class FormField extends Model
         'is_hidden_by_default' => 'bool',
         'show_in_scan' => 'bool',
         'show_in_form' => 'bool',
+        'show_in_participant' => 'bool',
         'meta' => 'array',
     ];
 
