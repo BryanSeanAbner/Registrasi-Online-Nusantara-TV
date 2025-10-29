@@ -9,6 +9,7 @@ use App\Repositories\Contracts\FormFieldRepositoryInterface;
 use App\Repositories\Eloquent\EloquentFormFieldRepository;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,5 +33,7 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment('production')) {
             URL::forceScheme('https');
         }
+        
+        Carbon::setLocale('id');
     }
 }
