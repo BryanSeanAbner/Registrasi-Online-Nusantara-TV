@@ -83,6 +83,14 @@ class EventsTable
                             $notif->send();
                             try { $notif->sendToDatabase(Auth::user()); } catch (\Throwable) {}
                         }),
+                    Action::make('delete')
+                        ->icon('heroicon-m-trash')
+                        ->label('Delete')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus Event')
+                        ->modalDescription('Apakah Anda yakin ingin menghapus event ini? Tindakan ini tidak dapat dibatalkan.')
+                        ->action(fn (Event $e) => $e->delete()),
                 ])
             ]);
     }

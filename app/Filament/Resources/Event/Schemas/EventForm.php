@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Event\Schemas;
 
 use App\Models\FormField;
+use App\Models\Event;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -14,6 +15,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\Str;
 
 class EventForm
 {
@@ -26,11 +29,61 @@ class EventForm
                         Grid::make(3)->schema([
                             TextInput::make('title')
                                 ->label('Title')
-                                ->required(),
+                                ->required()
+                                ->reactive()
+                                ->afterStateUpdated(function (Set $set, Get $get, $state) {
+                                    if ($get('id')) {
+                                        return;
+                                    }
+
+                                    $base = Str::slug($state ?? '');
+                                    if ($base === '') {
+                                        $set('slug', '');
+                                        return;
+                                    }
+
+                                    $slug = $base;
+                                    $i = 2;
+                                    while (
+                                        Event::query()
+                                            ->where('slug', $slug)
+                                            ->exists()
+                                    ) {
+                                        $slug = $base . '-' . $i;
+                                        $i++;
+                                    }
+
+                                    $set('slug', $slug);
+                                }),
     
                             TextInput::make('slug')
                                 ->label('Slug')
-                                ->required(),
+                                ->required()
+                                ->disabled()
+                                ->dehydrated(true)
+                                ->unique(ignoreRecord: true)
+                                ->default(function (Get $get) {
+                                    $title = $get('title');
+                                    $id = $get('id');
+                                    $base = Str::slug($title ?? '');
+                                    if ($base === '') {
+                                        return null;
+                                    }
+
+                                    $slug = $base;
+                                    $i = 2;
+                                    while (
+                                        Event::query()
+                                            ->when($id, fn ($q) => $q->where('id', '!=', $id))
+                                            ->where('slug', $slug)
+                                            ->exists()
+                                    ) {
+                                        $slug = $base . '-' . $i;
+                                        $i++;
+                                    }
+
+                                    return $slug;
+                                }),
     
                             TextInput::make('venue')
                                 ->label('Venue')
