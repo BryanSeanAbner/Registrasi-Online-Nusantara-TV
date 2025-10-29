@@ -40,6 +40,21 @@ class EventsTable
                         ->label('Edit')
                         ->color('warning')
                         ->url(fn (Event $e) => static::getResourceUrl('edit', $e)),
+                    Action::make('toggle_publish')
+                        ->icon(fn (Event $e) => $e->is_published ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                        ->label(fn (Event $e) => $e->is_published ? 'Unpublish' : 'Publish')
+                        ->action(function (Event $event) {
+                            $event->is_published = ! $event->is_published;
+                            $event->save();
+                        })
+                        ->color(function (Event $e) {
+                            return $e->is_published ? 'danger' : 'success';
+                        }),
+                    Action::make('list_participants')
+                        ->icon('heroicon-o-users')
+                        ->label('Participants')
+                        ->url(fn (Event $e) => route('event.participants', $e->slug))
+                        ->openUrlInNewTab(),
                     Action::make('blast_wa_reminder')
                         ->icon('heroicon-o-paper-airplane')
                         ->label('Blast WA Reminder')
