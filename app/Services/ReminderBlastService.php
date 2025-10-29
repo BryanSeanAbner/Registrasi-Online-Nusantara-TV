@@ -23,6 +23,16 @@ class ReminderBlastService
      */
     public function blast(Event $event, string $template, bool $includeQr = false): array
     {
+        // Check global and per-event WA blast enabled flags
+        $enabledGlobally = filter_var((string) config('wa.enabled', false), FILTER_VALIDATE_BOOL);
+        $enabledForEvent = (bool) data_get($event->brand, 'wa_blast_enabled', true);
+        if (! $enabledGlobally) {
+            throw new \RuntimeException('Pengiriman WA dimatikan secara global (WA_ENABLED=false).');
+        }
+        if (! $enabledForEvent) {
+            throw new \RuntimeException('Blast WA dinonaktifkan untuk event ini.');
+        }
+
         $total = 0;
         $dispatched = 0;
 

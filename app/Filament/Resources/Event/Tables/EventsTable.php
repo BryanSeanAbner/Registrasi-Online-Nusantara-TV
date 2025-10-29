@@ -13,6 +13,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Arr;
 
 class EventsTable
 {
@@ -59,6 +60,8 @@ class EventsTable
                         ->icon('heroicon-o-paper-airplane')
                         ->label('Blast WA Reminder')
                         ->color('success')
+                        ->disabled(fn (Event $e) => ! (bool) data_get($e->brand, 'wa_blast_enabled', true))
+                        ->tooltip(fn (Event $e) => (bool) data_get($e->brand, 'wa_blast_enabled', true) ? null : 'Blast WA dinonaktifkan untuk event ini')
                         ->requiresConfirmation()
                         ->modalHeading('Kirim Reminder WA ke peserta approved?')
                         ->modalDescription('Pesan akan dikirim ke semua pendaftar yang statusnya Approved pada event ini.')
@@ -72,16 +75,49 @@ class EventsTable
                         ->action(function (Event $event, array $data) {
                             /** @var ReminderBlastService $svc */
                             $svc = app(ReminderBlastService::class);
-                            $result = $svc->blast($event, (string) $data['message'], (bool) (false));
-    
-                            $notif = \Filament\Notifications\Notification::make()
-                                ->title('Blast WA dijadwalkan')
-                                ->body("Total: {$result['total']}\nDikirim: {$result['dispatched']}")
-                                ->success()
-                                ->persistent();
-    
-                            $notif->send();
-                            try { $notif->sendToDatabase(Auth::user()); } catch (\Throwable) {}
+                            try {
+                                $result = $svc->blast($event, (string) $data['message'], (bool) (false));
+
+                                $notif = \Filament\Notifications\Notification::make()
+                                    ->title('Blast WA dijadwalkan')
+                                    ->body("Total: {$result['total']}\nDikirim: {$result['dispatched']}")
+                                    ->success()
+                                    ->persistent();
+
+                                $notif->send();
+                                try { $notif->sendToDatabase(Auth::user()); } catch (\Throwable) {}
+                            } catch (\Throwable $e) {
+                                $notif = \Filament\Notifications\Notification::make()
+                                    ->title('Blast WA gagal')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->persistent();
+                                $notif->send();
+                                try { $notif->sendToDatabase(Auth::user()); } catch (\Throwable) {}
+                            }
+                        }),
+                    Action::make('toggle_wa_blast')
+                        ->icon(fn (Event $e) => (bool) data_get($e->brand, 'wa_blast_enabled', true) ? 'heroicon-o-bolt-slash' : 'heroicon-o-bolt')
+                        ->label(fn (Event $e) => (bool) data_get($e->brand, 'wa_blast_enabled', true) ? 'Disable WA Blast' : 'Enable WA Blast')
+                        ->color(fn (Event $e) => (bool) data_get($e->brand, 'wa_blast_enabled', true) ? 'danger' : 'success')
+                        ->visible(fn () => Auth::check() && (Auth::user()?->role === 'super_admin'))
+                        ->requiresConfirmation()
+                        ->modalHeading('Ubah status WA Blast?')
+                        ->modalDescription(fn (Event $e) => (bool) data_get($e->brand, 'wa_blast_enabled', true)
+                            ? 'Menonaktifkan Blast WA untuk event ini.'
+                            : 'Mengaktifkan kembali Blast WA untuk event ini.')
+                        ->action(function (Event $event) {
+                            $brand = (array) ($event->brand ?? []);
+                            $current = (bool) data_get($brand, 'wa_blast_enabled', true);
+                            $brand['wa_blast_enabled'] = ! $current;
+                            $event->update(['brand' => $brand]);
+
+                            $n = \Filament\Notifications\Notification::make()
+                                ->title('Pengaturan WA Blast diupdate')
+                                ->body('Status: ' . (! $current ? 'Enabled' : 'Disabled'))
+                                ->success();
+                            $n->send();
+                            try { $n->sendToDatabase(Auth::user()); } catch (\Throwable) {}
                         }),
                     Action::make('delete')
                         ->icon('heroicon-m-trash')

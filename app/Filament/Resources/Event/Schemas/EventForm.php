@@ -17,6 +17,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class EventForm
 {
@@ -107,6 +108,11 @@ class EventForm
 
                 Section::make('WA Message Template')
                     ->schema([
+                        Toggle::make('brand.wa_blast_enabled')
+                            ->label('Enable WA Blast')
+                            ->helperText('Jika dimatikan, fitur Blast WA untuk event ini dinonaktifkan. Hanya Super Admin yang dapat mengubah pengaturan ini.')
+                            ->default(true)
+                            ->visible(fn () => Auth::check() && (Auth::user()?->role === 'super_admin')),
                         Placeholder::make('wa_template_help')
                             ->hiddenLabel()
                             ->content('Gunakan template pesan WhatsApp untuk setiap event. Anda dapat memakai placeholder: {name}, {event}, {code}, {location}, {qr_url}. Biarkan kosong untuk memakai template bawaan.'),
