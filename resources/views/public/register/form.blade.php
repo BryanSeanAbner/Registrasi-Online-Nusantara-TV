@@ -146,7 +146,7 @@
                         @case('checkbox')
                           <div class="space-y-2">
                             @foreach(($field->meta['options'] ?? []) as $opt)
-                              <label class="flex items-center space-x-2 text-gray-700">
+                              <label class="flex items-center space-x-2 text-white">
                                 <input type="checkbox" name="{{ $field->name }}[]" value="{{ $opt }}" class="rounded text-blue-600 focus:ring-blue-500">
                                 <span>{{ $opt }}</span>
                               </label>
@@ -157,7 +157,7 @@
                         @case('radio')
                           <div class="space-y-2">
                             @foreach(($field->meta['options'] ?? []) as $opt)
-                              <label class="flex items-center space-x-2 text-gray-700">
+                              <label class="flex items-center space-x-2 text-white">
                                 <input type="radio" name="{{ $field->name }}" value="{{ $opt }}" class="text-blue-600 focus:ring-blue-500">
                                 <span>{{ $opt }}</span>
                               </label>
