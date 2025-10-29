@@ -8,5 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateFormField extends CreateRecord
 {
     protected static string $resource = FormFieldResource::class;
-}
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+}

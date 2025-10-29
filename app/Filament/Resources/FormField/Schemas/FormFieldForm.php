@@ -46,7 +46,7 @@ class FormFieldForm
 
             TextInput::make('label')
                 ->required()
-                ->reactive()
+                ->live(onBlur: true)
                 ->afterStateUpdated(function (Set $set, Get $get, $state) {
                     $eventId = $get('event_id');
                     $eventSlug = null;
@@ -96,7 +96,7 @@ class FormFieldForm
 
             Grid::make(2)->schema([
                 Toggle::make('is_required')->label('Required'),
-                Toggle::make('show_in_form')->label('Show in Form'),
+                Toggle::make('show_in_participant')->label('Show in Participant'),
                 Toggle::make('show_in_scan')->label('Show in Scan'),
             ])->columnSpanFull(),
 
@@ -105,9 +105,9 @@ class FormFieldForm
             TextInput::make('sort_order')
                 ->label('Urutan Tampilan')
                 ->numeric()
-                ->minValue(0)
+                ->minValue(1)
                 ->step(1)
-                ->placeholder('0 = paling atas')
+                ->placeholder('1 = paling atas')
                 ->helperText('Semakin kecil angkanya, semakin atas tampilnya. Contoh: 1 tampil di atas 2.')
                 ->default(function (Get $get) {
                     $eventId = $get('event_id');
@@ -115,7 +115,7 @@ class FormFieldForm
                         $max = (int) (FormFieldModel::where('event_id', $eventId)->max('sort_order') ?? -1);
                         return $max + 1;
                     }
-                    return 0;
+                    return 1;
                 }),
 
             TagsInput::make('meta.options')
