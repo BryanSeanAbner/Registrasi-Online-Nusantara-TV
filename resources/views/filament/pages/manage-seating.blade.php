@@ -87,7 +87,7 @@
               wire:loading.class="fi-seat-disabled"
               wire:target="openSeatModal"
               style="background: {{ $bg }}; color: {{ $color }}; text-align:center; padding:10px 8px; border-radius:8px; font-weight:600; cursor:pointer; position:relative;"
-              title="Edit {{ $seat['label'] }}"
+              title="{{ $seat['status'] === 'taken' ? 'Kursi terisi - hanya bisa lepas' : 'Edit ' . $seat['label'] }}"
             >
               <span x-show="!loading">{{ $seat['label'] }}</span>
               <span x-show="loading" x-cloak style="display: flex; align-items: center; justify-content: center; gap: 6px; vertical-align: middle">
@@ -123,7 +123,7 @@
               wire:loading.class="fi-seat-disabled"
               wire:target="openSeatModal"
               style="background: {{ $bg }}; color: {{ $color }}; text-align:center; padding:10px 8px; border-radius:8px; font-weight:600; cursor:pointer; position:relative;"
-              title="Edit {{ $seat['label'] }}"
+              title="{{ $seat['status'] === 'taken' ? 'Kursi terisi - hanya bisa lepas' : 'Edit ' . $seat['label'] }}"
             >
               <span x-show="!loading">{{ $seat['label'] }}</span>
               <span x-show="loading" x-cloak style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; vertical-align: middle">
@@ -137,7 +137,7 @@
   @endif
 
 
-  <x-filament.seat-edit-modal id="edit-seat" />
+  <x-filament.seat-edit-modal id="edit-seat" :is-taken="$seatIsTaken" />
   <x-filament.table-edit-modal id="edit-table" />
   <x-filament.table-create-modal id="create-table" />
   <x-filament.confirm-delete-table-modal id="confirm-delete-table" :label="$selectedTableLabel" />

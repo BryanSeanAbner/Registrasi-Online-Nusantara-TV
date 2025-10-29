@@ -27,6 +27,7 @@ class ManageSeating extends Page
     // Modal & form state
     public bool $isSeatModalOpen = false;
     public ?int $selectedSeatId = null;
+    public bool $seatIsTaken = false;
     public array $seatForm = [
         'label' => '',
         'section' => '',
@@ -119,6 +120,8 @@ class ManageSeating extends Page
             'status' => (string) ($seat->status ?: 'available'),
         ];
 
+        $this->seatIsTaken = (bool) $seat->assignment;
+
         // Open Filament modal
         $this->dispatch('open-modal', id: 'edit-seat');
     }
@@ -143,8 +146,17 @@ class ManageSeating extends Page
             ]
         );
 
-        $seat = Seat::where('event_id', $this->activeEventId)
+        $seat = Seat::with('assignment')
+            ->where('event_id', $this->activeEventId)
             ->findOrFail($this->selectedSeatId);
+
+        if ($seat->assignment) {
+            Notification::make()
+                ->title('Kursi sudah terisi dan tidak bisa diedit')
+                ->danger()
+                ->send();
+            return;
+        }
 
         $seat->update([
             'label' => $this->seatForm['label'],
@@ -163,6 +175,38 @@ class ManageSeating extends Page
         // Close modals
         $this->dispatch('close-modal', id: 'edit-seat');
         $this->dispatch('close-modal', id: 'confirm-delete-seat');
+    }
+
+    public function unassignSeat(): void
+    {
+        if (! $this->selectedSeatId) {
+            return;
+        }
+
+        $seat = Seat::with('assignment')
+            ->where('event_id', $this->activeEventId)
+            ->findOrFail($this->selectedSeatId);
+
+        if (! $seat->assignment) {
+            Notification::make()
+                ->title('Kursi tidak sedang terisi')
+                ->warning()
+                ->send();
+        } else {
+            $seat->assignment->delete();
+
+            Notification::make()
+                ->title('Kursi dilepaskan')
+                ->success()
+                ->send();
+        }
+
+        $this->seatIsTaken = false;
+        $this->selectedSeatId = null;
+        $this->loadData();
+
+        $this->dispatch('close-modal', id: 'confirm-release-seat');
+        $this->dispatch('close-modal', id: 'edit-seat');
     }
 
     public function deleteSeat(): void
