@@ -70,7 +70,7 @@
                   </div>
                   <div>
                     <p class="text-blue-700 text-sm">Email</p>
-                    <p class="text-gray-900 font-medium">nusantaratv@gmail.com</p>
+                    <p class="text-gray-900 font-medium">sales.marketing@nusantaratv.com</p>
                   </div>
                 </div>
 
@@ -82,7 +82,7 @@
                   </div>
                   <div>
                     <p class="text-blue-700 text-sm">No Telepon</p>
-                    <p class="text-gray-900 font-medium">+62 857-7734-9636</p>
+                    <p class="text-gray-900 font-medium">+62 853-5372-5308</p>
                   </div>
                 </div>
 
@@ -95,7 +95,7 @@
                   </div>
                   <div>
                     <p class="text-blue-700 text-sm">Lokasi</p>
-                    <p class="text-gray-900 font-medium">Jl. Pulomas Selatan Kav. Blok, Kota Jakarta Timur 13210</p>
+                    <p class="text-gray-900 font-medium">NT Tower Jl. Pulomas Selatan Kav. 31, Jakarta Timur</p>
                   </div>
                 </div>
               </div>
