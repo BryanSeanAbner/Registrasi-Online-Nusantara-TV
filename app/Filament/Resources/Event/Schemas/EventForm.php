@@ -31,7 +31,7 @@ class EventForm
                             TextInput::make('title')
                                 ->label('Title')
                                 ->required()
-                                ->reactive()
+                                ->live(onBlur: true)
                                 ->afterStateUpdated(function (Set $set, Get $get, $state) {
                                     if ($get('id')) {
                                         return;
