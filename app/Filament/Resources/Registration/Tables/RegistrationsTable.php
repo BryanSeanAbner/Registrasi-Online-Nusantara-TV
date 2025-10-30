@@ -55,10 +55,30 @@ class RegistrationsTable
             ])
             ->persistSearchInSession()
             ->recordUrl(null)
+            ->headerActions([
+                Action::make('export_all')
+                    ->label('Export Semua Data')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('primary')
+                    ->action(function () {
+                        $query = Registration::query();
+                        $active = session('active_event_id');
+                        if ($active) {
+                            $query->where('event_id', $active);
+                        }
+
+                        $records = $query->with(['event', 'seatAssignment.seat', 'fieldValues.field'])->get();
+
+                        return Excel::download(
+                            new \App\Exports\RegistrationsExport($records),
+                            'registrations-all-' . now()->format('Y-m-d') . '.xlsx'
+                        );
+                    }),
+            ])
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('export')
-                        ->label('Export Excel')
+                        ->label('Export Terpilih')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(function (Collection $records) {
                             return Excel::download(
