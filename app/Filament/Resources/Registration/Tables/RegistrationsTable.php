@@ -60,6 +60,7 @@ class RegistrationsTable
                     ->label('Export Semua Data')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('primary')
+                    ->visible(fn () => filled(session('active_event_id')))
                     ->action(function () {
                         $query = Registration::query();
                         $active = session('active_event_id');
