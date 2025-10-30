@@ -50,9 +50,9 @@ class OverviewStats extends BaseWidget
                 ->icon('heroicon-o-clock')
                 ->description('Awaiting review')
                 ->color('warning'),
-            Stat::make('Scans Today', number_format($scansToday))
+            Stat::make('Scan Hari Ini', number_format($scansToday))
                 ->icon('heroicon-o-qr-code')
-                ->description('Check-ins today')
+                ->description('Check-in hari ini')
                 ->color('secondary'),
         ];
     }
