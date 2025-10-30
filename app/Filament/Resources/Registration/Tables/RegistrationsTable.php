@@ -128,7 +128,7 @@ class RegistrationsTable
 
                             Notification::make()
                                 ->title('Bulk Approve selesai')
-                                ->body($summary . (count($fails) ? "\n\nGagal:\n- " . implode("\n- ", array_slice($fails, 0, 5)) . (count($fails) > 5 ? "\n…" : "") : ""))
+                                ->body($summary . (count($fails) ? "\n\nGagal:\n- " . implode("\n- ", array_slice($fails, 0, 5)) . (count($fails) > 5 ? "\nâ€¦" : "") : ""))
                                 ->success()
                                 ->send();
                         }),
@@ -285,7 +285,7 @@ class RegistrationsTable
                 ->formatStateUsing(fn () => ''),
             TextColumn::make('seat.assignment.seat.label')
                 ->label('Kursi')
-                ->getStateUsing(fn ($record) => optional($record->seatAssignment?->seat)->label ?? '—'),
+                ->getStateUsing(fn ($record) => optional($record->seatAssignment?->seat)->label ?? 'â€”'),
             TextColumn::make('created_at')->dateTime()->sortable(),
         ];
     }

@@ -1,8 +1,6 @@
-﻿<?php
-
+<?php
 namespace App\Exports;
 
-use App\Models\Registration;
 use App\Models\FormField;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -18,7 +16,7 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
 {
     protected $registrations;
     protected $qrPaths = [];
-    protected $fields; // dynamic form fields included in export
+    protected $fields;
 
     public function __construct($registrations)
     {
@@ -177,7 +175,6 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
 
     protected function resolveFields()
     {
-        // Determine fields across all events contained in the registrations collection
         $eventIds = collect($this->registrations)->pluck('event_id')->filter()->unique()->values();
 
         $query = FormField::query();
@@ -200,4 +197,3 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
         return $letter;
     }
 }
-
