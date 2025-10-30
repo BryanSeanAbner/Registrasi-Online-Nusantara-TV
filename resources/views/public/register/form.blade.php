@@ -114,10 +114,10 @@
 
                     @foreach($fields as $field)
                       <div>
-                      <label for="{{ $field->name }}" class="block text-sm font-medium text-blue-700 mb-2">
+                      <label for="{{ $field->name }}" class="block text-sm font-medium text-gray-700 mb-2">
                         {{ $field->label }}
                         @if(!$field->is_required)
-                          <span class="text-blue-500">(opsional)</span>
+                          <span class="text-gray-500">(opsional)</span>
                         @endif
                       </label>
 
@@ -134,7 +134,7 @@
                                  type="{{ $field->type === 'numeric' ? 'number' : ($field->type === 'phone' ? 'text' : $field->type) }}"
                                  placeholder="Masukkan {{ $field->label }}"
                                  @required($field->is_required)
-                                  class="w-full bg-transparent border-0 border-b border-blue-200 px-0 py-2 text-gray-900 placeholder-blue-400 focus:outline-none focus:ring-0 focus:border-blue-600" />
+                                  class="w-full bg-transparent border-0 border-b border-gray-300 px-0 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-600" />
                           @break
 
                         @case('textarea')
@@ -143,14 +143,14 @@
                                     rows="3"
                                     placeholder="Masukkan {{ $field->label }}"
                                     @required($field->is_required)
-                                    class="w-full bg-transparent border-0 border-b border-blue-200 px-0 py-2 text-gray-900 placeholder-blue-400 focus:outline-none focus:ring-0 focus:border-blue-600"></textarea>
+                                    class="w-full bg-transparent border-0 border-b border-gray-300 px-0 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-600"></textarea>
                           @break
 
                         @case('select')
                           <select id="{{ $field->name }}"
                                   name="{{ $field->name }}"
                                   @required($field->is_required)
-                                  class="w-full bg-transparent border-0 border-b border-blue-200 px-0 py-2 text-gray-900 focus:outline-none focus:ring-0 focus:border-blue-600">
+                                  class="w-full bg-transparent border-0 border-b border-gray-300 px-0 py-2 text-gray-900 focus:outline-none focus:ring-0 focus:border-gray-600">
                             <option value="">-- pilih --</option>
                             @foreach(($field->meta['options'] ?? []) as $opt)
                               <option value="{{ $opt }}">{{ $opt }}</option>
@@ -161,8 +161,8 @@
                         @case('checkbox')
                           <div class="space-y-2">
                             @foreach(($field->meta['options'] ?? []) as $opt)
-                              <label class="flex items-center space-x-2 text-blue-800">
-                                <input type="checkbox" name="{{ $field->name }}[]" value="{{ $opt }}" class="rounded text-blue-600 focus:ring-blue-600">
+                              <label class="flex items-center space-x-2 text-gray-800">
+                                <input type="checkbox" name="{{ $field->name }}[]" value="{{ $opt }}" class="rounded text-gray-700 focus:ring-gray-600">
                                 <span>{{ $opt }}</span>
                               </label>
                             @endforeach
@@ -172,8 +172,8 @@
                         @case('radio')
                           <div class="space-y-2">
                             @foreach(($field->meta['options'] ?? []) as $opt)
-                              <label class="flex items-center space-x-2 text-blue-800">
-                                <input type="radio" name="{{ $field->name }}" value="{{ $opt }}" class="text-blue-600 focus:ring-blue-600">
+                              <label class="flex items-center space-x-2 text-gray-800">
+                                <input type="radio" name="{{ $field->name }}" value="{{ $opt }}" class="text-gray-700 focus:ring-gray-600">
                                 <span>{{ $opt }}</span>
                               </label>
                             @endforeach
@@ -186,7 +186,7 @@
                                  type="file"
                                  accept="image/*"
                                  @required($field->is_required)
-                                  class="w-full rounded-md border border-blue-200 bg-white px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600" />
+                                  class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-600" />
                           @break
                         @endswitch
                       </div>
