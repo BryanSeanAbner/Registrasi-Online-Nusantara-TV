@@ -36,6 +36,11 @@ class EventsTable
                         ->icon('heroicon-o-eye')
                         ->label('View')
                         ->url(fn (Event $e) => route('event.show', $e->slug))->openUrlInNewTab(),
+                    Action::make('download_register_qr')
+                        ->icon('heroicon-o-qr-code')
+                        ->label('Download QR Registrasi')
+                        ->url(fn (Event $e) => route('event.register.qr', $e->slug))
+                        ->openUrlInNewTab(),
                     Action::make('edit')
                         ->icon('heroicon-m-pencil-square')
                         ->label('Edit')
