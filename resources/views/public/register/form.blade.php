@@ -105,7 +105,9 @@
               <div class="rounded-md h-full border border-blue-200 bg-white shadow border-t-8 border-blue-600">
 
                 <div class="px-8 pt-6 pb-2">
-                  <h1 class="text-2xl font-semibold text-gray-900">Daftar {{ $event->title }}</h1>
+                  <h1 class="text-xl md:text-2xl font-semibold text-gray-900 leading-tight text-center" title="{{ $event->title }}" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                    {{ $event->title }}
+                  </h1>
                 </div>
 
                 <div class="px-8 pb-6">
