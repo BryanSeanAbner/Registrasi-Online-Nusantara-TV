@@ -286,7 +286,7 @@ class RegistrationsTable
                 ->formatStateUsing(fn () => ''),
             TextColumn::make('seat.assignment.seat.label')
                 ->label('Kursi')
-                ->getStateUsing(fn ($record) => optional($record->seatAssignment?->seat)->label ?? 'â€”'),
+                ->getStateUsing(fn ($record) => optional($record->seatAssignment?->seat)->label ?? '-'),
             TextColumn::make('created_at')->dateTime()->sortable(),
         ];
     }
