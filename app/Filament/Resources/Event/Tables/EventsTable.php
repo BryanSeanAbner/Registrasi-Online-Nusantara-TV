@@ -13,7 +13,6 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Arr;
 
 class EventsTable
 {
@@ -21,12 +20,35 @@ class EventsTable
     {
         return $table
             ->columns([
-                TextColumn::make('created_at')->dateTime()->sortable(),
-                TextColumn::make('title')->searchable(),
-                TextColumn::make('slug'),
-                TextColumn::make('venue'),
-                TextColumn::make('starts_at')->dateTime()->sortable(),
-                TextColumn::make('ends_at')->dateTime()->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime('Y-m-d H:i')
+                    ->sortable(),
+
+                TextColumn::make('title')
+                    ->searchable()
+                    ->limit(40)
+                    ->wrap()
+                    ->tooltip(fn ($record) => (string) ($record->title ?? '')),
+
+                TextColumn::make('slug')
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->tooltip(fn ($record) => (string) ($record->slug ?? '')),
+
+                TextColumn::make('venue')
+                    ->limit(40)
+                    ->wrap()
+                    ->tooltip(fn ($record) => (string) ($record->venue ?? '')),
+
+                TextColumn::make('starts_at')
+                    ->dateTime('Y-m-d H:i')
+                    ->sortable(),
+
+                TextColumn::make('ends_at')
+                    ->dateTime('Y-m-d H:i')
+                    ->sortable(),
+
                 IconColumn::make('is_published')->boolean()->label('Published'),
             ])
             ->recordUrl(null)
