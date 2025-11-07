@@ -28,7 +28,7 @@
         <div class="relative h-40 sm:h-56 md:h-64 bg-cover bg-center" style="{{ $bgStyle }}">
           <div class="absolute inset-0"></div>
 
-          <div class="absolute top-4 left-4 hidden sm:block">
+          {{-- <div class="absolute top-4 left-4 hidden sm:block">
             @if($logoPath)
               <img src="{{ route('event.image', $logo) }}" alt="Logo" class="object-contain bg-white/95 rounded-md shadow px-3 py-2 max-w-[180px] max-h-[64px]" />
             @else
@@ -36,7 +36,7 @@
                 <span class="text-blue-700 text-xl font-bold">ntv</span>
               </div>
             @endif
-          </div>
+          </div> --}}
 
           @if(!$bgPath)
             <div class="relative h-full flex items-center justify-center px-6">
