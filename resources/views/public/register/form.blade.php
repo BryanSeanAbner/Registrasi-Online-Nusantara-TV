@@ -46,7 +46,7 @@
         </div>
         <div class="h-2 bg-blue-600"></div>
 
-        @if($logoPath)
+        {{-- @if($logoPath)
           <div class="sm:hidden mt-6 px-6 flex justify-center">
             <img src="{{ route('event.image', $logo) }}" alt="Logo" class="object-contain bg-white/95 rounded-md shadow px-2 py-1 max-w-[120px] max-h-[44px]" />
           </div>
@@ -56,7 +56,7 @@
               <span class="text-blue-700 text-2xl font-bold">ntv</span>
             </div>
           </div>
-        @endif
+        @endif --}}
 
         <div class="p-6 sm:p-8">
           <div class="grid grid-cols-1 gap-8">
