@@ -5,6 +5,7 @@ namespace App\Filament\Resources\FormField\Tables;
 use App\Models\FormField;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Schemas\Components\Form;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -22,7 +23,11 @@ class FormFieldsTable
             }
         })
         ->columns([
-            TextColumn::make('event.title')->label('Event'),
+            TextColumn::make('event.title')
+                ->label('Event')
+                ->limit(40)
+                ->wrap()
+                ->tooltip(fn (FormField $record) => (string) ($record->event?->title ?? '')),
             TextColumn::make('label')->searchable(),
             // TextColumn::make('name'),
             TextColumn::make('type'),
@@ -41,6 +46,7 @@ class FormFieldsTable
                 ->default(fn () => session('active_event_id'))
                 ->searchable(),
         ])
+        ->recordUrl(null)
         ->recordActions([
             ActionGroup::make([
                 Action::make('move_up')
