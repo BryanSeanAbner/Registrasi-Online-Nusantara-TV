@@ -49,4 +49,9 @@ class SeatResource extends Resource
             'edit' => EditSeat::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(array $parameters = []): bool
+    {
+        return false;
+    }
 }

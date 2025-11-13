@@ -28,6 +28,7 @@ class SeatsTable
                 TextColumn::make('event.title')
                     ->label('Event')
                     ->searchable(),
+                TextColumn::make('table.label')->label('Meja')->toggleable(),
                 TextColumn::make('section')
                     ->searchable(),
                 TextColumn::make('row')
@@ -57,14 +58,18 @@ class SeatsTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-            ])
+            ])           
             ->filters([
-            SelectFilter::make('event_id')
-                ->label('Event')
-                ->relationship('event', 'title')
-                ->preload()
-                ->default(fn () => session('active_event_id'))
-                ->searchable(),
+                SelectFilter::make('event_id')
+                    ->label('Event')
+                    ->relationship('event', 'title')
+                    ->preload()
+                    ->default(fn () => session('active_event_id'))
+                    ->searchable(),
+                SelectFilter::make('table_id')
+                    ->label('Meja')
+                    ->relationship('table', 'label')
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -106,3 +111,4 @@ class SeatsTable
             ]);
     }
 }
+

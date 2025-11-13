@@ -9,7 +9,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RecentScans extends BaseWidget
 {
-    protected static ?string $heading = 'Recent Scans';
+    protected static ?string $heading = 'Scan Terbaru';
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
@@ -19,16 +19,17 @@ class RecentScans extends BaseWidget
         return $table
             ->query(
                 Scan::query()
+                    ->with(['registration.event', 'scannedBy'])
                     ->when($active, fn ($q, $id) => $q->whereHas('registration', fn ($r) => $r->where('event_id', $id)))
                     ->latest()
                     ->limit(8)
             )
             ->columns([
-                TextColumn::make('code')->label('Code')->copyable(),
+                TextColumn::make('code')->label('Kode')->copyable(),
                 TextColumn::make('registration.event.title')->label('Event')->toggleable(),
-                TextColumn::make('location')->label('Location')->limit(24)->toggleable(),
-                TextColumn::make('created_at')->label('When')->dateTime()->sortable(),
+                TextColumn::make('scannedBy.name')->label('Petugas')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('location')->label('Lokasi')->limit(24)->toggleable(),
+                TextColumn::make('created_at')->label('Waktu')->dateTime()->sortable(),
             ]);
     }
 }
-

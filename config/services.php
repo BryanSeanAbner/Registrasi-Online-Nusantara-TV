@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'cuttly' => [
+        'key' => env('CUTTLY_API_KEY'),
+    ],
+
 ];

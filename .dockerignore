@@ -1,0 +1,17 @@
+/.git
+/.github
+/node_modules
+/vendor
+/storage/debugbar
+/storage/framework/cache
+/storage/framework/views
+/storage/framework/sessions
+/storage/logs
+/.env.*.local
+/.idea
+/.vscode
+/.DS_Store
+/.fleet
+/docker-compose.override.yml
+Dockerfile.prod
+public/storage

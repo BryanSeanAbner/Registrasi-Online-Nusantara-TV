@@ -28,32 +28,44 @@ class EventController extends Controller
 
     public function participants(string $slug)
     {
-        $event = Event::whereSlug($slug)
-            ->where('is_published', true)
-            ->firstOrFail();
-
-        $registrations = Registration::with(['values.field'])
-            ->where('event_id', $event->id)
-            ->orderByDesc('created_at')
-            ->get();
-        $total = $registrations->count();
-
-        return view('public.register.participant', compact('event','registrations','total'));
+        $event = $this->events->findPublishedBySlug($slug);
+        return $this->participantsViewFor($event);
     }
 
-    public function participantsLatest()
+    private function participantsViewFor(Event $event)
     {
-        $event = Event::where('is_published', true)
-            ->orderByDesc('starts_at')
-            ->firstOrFail();
-
+        $event->load('formFields');
         $registrations = Registration::with(['values.field'])
             ->where('event_id', $event->id)
+            ->where('checked_in_at', '!=', null)
             ->orderByDesc('created_at')
             ->get();
         $total = $registrations->count();
 
-        return view('public.register.participant', compact('event','registrations','total'));
+        return view('public.register.participant', compact('event', 'registrations', 'total'));
+    }
+
+    public function participantRowJson(Event $event, Registration $registration)
+    {
+        abort_unless($registration->event_id === $event->id, 404);
+        $registration->load(['values.field']);
+
+        $values = $registration->values
+            ->filter(fn ($fv) => $fv->field && $fv->field->event_id === $event->id)
+            ->map(fn ($fv) => [
+                'field_id' => $fv->field->id,
+                'type' => $fv->field->type,
+                'value' => $fv->value,
+            ])
+            ->values();
+
+        return response()->json([
+            'registration_id' => $registration->id,
+            'event_id' => $event->id,
+            'code' => $registration->code,
+            'checked_in_at' => optional($registration->checked_in_at)->toIso8601String(),
+            'values' => $values,
+        ]);
     }
 
     public function eventImage(string $img)

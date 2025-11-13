@@ -13,6 +13,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Navigation\NavigationGroup;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -31,7 +32,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->globalSearch(false)
-            ->login()
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('15s')
+            ->login(\App\Filament\Auth\Login::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -55,6 +58,12 @@ class AdminPanelProvider extends PanelProvider
                 RecentRegistrations::class,
                 RecentScans::class,
             ])
+            ->navigationGroups([
+                NavigationGroup::make()->label('Operations'),
+                NavigationGroup::make()->label('Event Management'),
+                NavigationGroup::make()->label('Account'),
+                NavigationGroup::make()->label('System'),
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -73,4 +82,3 @@ class AdminPanelProvider extends PanelProvider
             ]);
     }
 }
-

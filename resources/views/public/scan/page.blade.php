@@ -9,7 +9,7 @@
 
     <div class="mt-4">
       <label for="code" class="mb-1 block text-sm font-medium text-gray-700">Atau scan / ketik kode tiket:</label>
-      <input id="code" autofocus class="w-full rounded-md border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Scan atau ketik kode lalu Enter">
+      <input id="code" autofocus class="w-full rounded-md border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Scan atau ketik kode lalu Enter" autocomplete="off">
     </div>
 
     <pre id="result" class="mt-4 whitespace-pre-wrap rounded-md bg-gray-50 p-3 text-sm text-gray-800"></pre>
@@ -49,13 +49,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitCode = async code => {
     if (!code) return;
     result.textContent = '⏳ Memeriksa...';
+    detail.innerHTML = '';
 
     const { ok, data } = await ajax('POST', `{{ route('scan.submit') }}`, { code });
-    result.textContent = `${ok ? '✅' : '❌'} ${data?.msg ?? 'Gagal.'}`;
-    result.className = `mt-4 whitespace-pre-wrap rounded-md p-3 text-sm ${
-      ok ? 'bg-green-50 text-green-700 border border-green-200'
-         : 'bg-red-50 text-red-700 border border-red-200'
-    }`;
+    
+    if (ok) {
+      // Tampilkan animasi check untuk sukses
+      const timestamp = new Date().getTime();
+      result.innerHTML = `
+        <div class="flex items-center justify-center mb-2">
+          <img src="/api/check-animation?t=${timestamp}" alt="Success" class="w-16 h-16" />
+        </div>
+        <div class="text-center">${data?.msg ?? 'Berhasil!'}</div>
+      `;
+      result.className = `mt-4 whitespace-pre-wrap rounded-md p-3 text-sm bg-green-50 text-green-700 border border-green-200`;
+    } else {
+      result.textContent = `❌ ${data?.msg ?? 'Gagal.'}`;
+      result.className = `mt-4 whitespace-pre-wrap rounded-md p-3 text-sm bg-red-50 text-red-700 border border-red-200`;
+    }
 
     if (ok && data.code) {
       
@@ -96,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const groupBySection = seats => {
       const g = {};
       seats.forEach(s => {
-        const key = s.section || '';
+        const key = s.section || s.table || '';
         (g[key] ??= []).push(s);
       });
       Object.keys(g).forEach(k => {

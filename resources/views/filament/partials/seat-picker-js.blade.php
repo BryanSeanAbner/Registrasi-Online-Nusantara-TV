@@ -21,7 +21,7 @@
 
     function groupSeats() {
       const g = {};
-      for (const s of state.seats) (g[s.section ?? ''] ??= []).push(s);
+      for (const s of state.seats) (g[s.section ?? s.table ?? ''] ??= []).push(s);
       for (const k of Object.keys(g)) {
         g[k].sort((a,b)=>{
           if (a.row === b.row) return (a.col ?? 0) - (b.col ?? 0);

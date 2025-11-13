@@ -15,6 +15,13 @@ class UserForm
                 ->required()
                 ->maxLength(255),
 
+            TextInput::make('username')
+                ->label('Username')
+                ->required(fn (string $operation): bool => $operation === 'create')
+                ->maxLength(255)
+                ->rule('alpha_dash')
+                ->unique(ignoreRecord: true),
+
             TextInput::make('email')
                 ->email()
                 ->required()
