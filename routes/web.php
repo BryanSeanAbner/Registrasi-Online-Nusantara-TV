@@ -9,6 +9,8 @@ use App\Http\Controllers\SeatController;
 use App\Http\Controllers\CheckAnimationController;
 use Illuminate\Support\Facades\Response;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\Event;
+use App\Services\QrService;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -47,8 +49,10 @@ Route::get('/e/{slug}/register/thanks', function(string $slug) {
     return view('public.register.thanks');
 })->name('register.thanks');
 Route::get('/e/{slug}/register/qrcode.png', function (string $slug) {
-    $url = route('register.create', ['slug' => $slug]);
-    $png = QrCode::format('png')->size(600)->margin(1)->generate($url);
+    $event = Event::where('slug', $slug)->firstOrFail();
+    /** @var QrService $svc */
+    $svc = app(QrService::class);
+    $png = $svc->registrationQrForEvent($event, 600, 1);
 
     $filename = 'register-' . $slug . '.png';
     return response($png, 200, [
