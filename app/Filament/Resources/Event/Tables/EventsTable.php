@@ -2,13 +2,16 @@
 
 namespace App\Filament\Resources\Event\Tables;
 
+use App\Filament\Resources\Event\EventResource;
 use App\Services\ReminderBlastService;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Services\ShortLinkService;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -31,10 +34,10 @@ class EventsTable
                     ->wrap()
                     ->tooltip(fn ($record) => (string) ($record->title ?? '')),
 
-                TextColumn::make('slug')
+                TextColumn::make('short_link')
                     ->limit(30)
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->tooltip(fn ($record) => (string) ($record->slug ?? '')),
+                    ->copyable()
+                    ->tooltip(fn ($record) => (string) ($record->short_link ?? '')),
 
                 TextColumn::make('venue')
                     ->limit(40)
@@ -63,6 +66,28 @@ class EventsTable
                         ->label('Download QR Registrasi')
                         ->url(fn (Event $e) => route('event.register.qr', $e->slug))
                         ->openUrlInNewTab(),
+                    Action::make('genearte_short_link')
+                        ->icon('heroicon-o-link')
+                        ->label('Generate Short Link')
+                        ->action(function (Event $event) {
+                            $svc = app(ShortLinkService::class);
+                            // $short = $svc->shorten(env('NGROK_URL') . '/e/' . $event->slug . '/register');
+                            $short = $svc->shorten(route('event.show', $event->slug).'/register');
+                            if ($short) {
+                                $event->short_link = $short;
+                                $event->save();
+                                Notification::make()
+                                    ->title('Short link generated')
+                                    ->body($short)
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Gagal membuat short link')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
                     Action::make('edit')
                         ->icon('heroicon-m-pencil-square')
                         ->label('Edit')
@@ -105,7 +130,7 @@ class EventsTable
                             try {
                                 $result = $svc->blast($event, (string) $data['message'], (bool) (false));
 
-                                $notif = \Filament\Notifications\Notification::make()
+                                $notif = Notification::make()
                                     ->title('Blast WA dijadwalkan')
                                     ->body("Total: {$result['total']}\nDikirim: {$result['dispatched']}")
                                     ->success()
@@ -114,7 +139,7 @@ class EventsTable
                                 $notif->send();
                                 try { $notif->sendToDatabase(Auth::user()); } catch (\Throwable) {}
                             } catch (\Throwable $e) {
-                                $notif = \Filament\Notifications\Notification::make()
+                                $notif = Notification::make()
                                     ->title('Blast WA gagal')
                                     ->body($e->getMessage())
                                     ->danger()
@@ -139,7 +164,7 @@ class EventsTable
                             $brand['wa_blast_enabled'] = ! $current;
                             $event->update(['brand' => $brand]);
 
-                            $n = \Filament\Notifications\Notification::make()
+                            $n = Notification::make()
                                 ->title('Pengaturan WA Blast diupdate')
                                 ->body('Status: ' . (! $current ? 'Enabled' : 'Disabled'))
                                 ->success();
@@ -160,8 +185,7 @@ class EventsTable
 
     protected static function getResourceUrl(string $name, Event $event): string
     {
-        /** @var class-string<\App\Filament\Resources\Event\EventResource> $res */
-        $res = \App\Filament\Resources\Event\EventResource::class;
+        $res = EventResource::class;
         return $res::getUrl($name, ['record' => $event]);
     }
 }
