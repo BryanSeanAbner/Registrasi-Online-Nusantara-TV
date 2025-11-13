@@ -259,7 +259,10 @@ class RegistrationsTable
             TextColumn::make('event.title')
                 ->label('Event')
                 ->sortable()
-                ->searchable(),
+                ->searchable()
+                ->limit(50)
+                ->wrap()
+                ->tooltip(fn (Registration $record) => (string) ($record->event?->title ?? '')),
             TextColumn::make('status')
                 ->badge()
                 ->color(fn (string $state) => match ($state) {
