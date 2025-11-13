@@ -69,6 +69,7 @@ class EventsTable
                     Action::make('genearte_short_link')
                         ->icon('heroicon-o-link')
                         ->label('Generate Short Link')
+                        ->disabled(fn (Event $e) => ! empty($e->short_link))
                         ->action(function (Event $event) {
                             $svc = app(ShortLinkService::class);
                             // $short = $svc->shorten(env('NGROK_URL') . '/e/' . $event->slug . '/register');
