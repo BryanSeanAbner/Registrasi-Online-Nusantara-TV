@@ -29,7 +29,6 @@ class ShortLinkService
 
     public function eventRegisterUrl(string $slug): string
     {
-        dd($this->publicBaseUrl());
         return $this->publicBaseUrl() . '/e/' . $slug . '/register';
     }
 
