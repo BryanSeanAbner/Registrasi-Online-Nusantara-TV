@@ -72,8 +72,9 @@ class EventsTable
                         ->disabled(fn (Event $e) => ! empty($e->short_link))
                         ->action(function (Event $event) {
                             $svc = app(ShortLinkService::class);
-                            // $short = $svc->shorten(env('NGROK_URL') . '/e/' . $event->slug . '/register');
-                            $short = $svc->shorten(route('event.show', $event->slug).'/register');
+                            $longUrl = $svc->eventRegisterUrl($event->slug);
+                            $short = $svc->shortenTinyURL($longUrl);
+
                             if ($short) {
                                 $event->short_link = $short;
                                 $event->save();

@@ -39,4 +39,16 @@ return [
         'key' => env('CUTTLY_API_KEY'),
     ],
 
+    'tinyurl' => [
+        'key' => env('TINYULR_API_KEY'),
+    ],
+
+    'ngrok' => [
+        'url' => env('NGROK_URL'),
+    ],
+
+    'shortlink' => [
+        'base' => env('SHORTLINK_BASE', 'auto'),
+    ],
+
 ];
