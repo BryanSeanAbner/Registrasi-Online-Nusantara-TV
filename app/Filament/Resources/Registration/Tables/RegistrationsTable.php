@@ -53,6 +53,7 @@ class RegistrationsTable
                     })
                     ->grow(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->persistSearchInSession()
             ->recordUrl(null)
             ->headerActions([
