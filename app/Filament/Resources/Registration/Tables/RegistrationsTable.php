@@ -266,24 +266,17 @@ class RegistrationsTable
     public static function baseColumns(): array
     {
         return [
-            TextColumn::make('name_full')
-                ->label('Nama Peserta')
-                ->sortable()
-                ->searchable()
+            TextColumn::make('full_name')
+                ->label('Nama Pendaftar')
+                ->getStateUsing(fn (Registration $record) => app(RegistrationApprovalService::class)->getParticipantName($record) ?? 'Tidak diketahui')
+                ->searchable(query: function (Builder $query, string $search) {
+                    $query->whereHas('fieldValues', function ($q) use ($search) {
+                        $q->where('value', 'like', "%{$search}%");
+                    });
+                })
                 ->limit(50)
                 ->wrap()
-                ->state(fn (Registration $record) => app(RegistrationApprovalService::class)->getParticipantName($record))
                 ->tooltip(fn (Registration $record) => (string) (app(RegistrationApprovalService::class)->getParticipantName($record) ?? '')),
-            TextColumn::make('event.title')
-                ->label('Event')
-                ->toggleable(
-                    isToggledHiddenByDefault: fn () => filled(session('active_event_id'))
-                )
-                ->sortable()
-                ->searchable()
-                ->limit(50)
-                ->wrap()
-                ->tooltip(fn (Registration $record) => (string) ($record->event?->title ?? '')),
             TextColumn::make('status')
                 ->badge()
                 ->color(fn (string $state) => match ($state) {
