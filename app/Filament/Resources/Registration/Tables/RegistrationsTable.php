@@ -45,7 +45,7 @@ class RegistrationsTable
                 ViewColumn::make('form_answers')
                     ->label('Form Answers')
                     ->view('filament.tables.columns.registration-form-fields')
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(query: function (Builder $query, string $search) {
                         $query->whereHas('fieldValues', function ($q) use ($search) {
                             $q->where('value', 'like', "%{$search}%");
@@ -56,6 +56,7 @@ class RegistrationsTable
             ->defaultSort('created_at', 'desc')
             ->persistSearchInSession()
             ->recordUrl(null)
+            ->recordAction('view_registration_detail')
             ->headerActions([
                 Action::make('export_all')
                     ->label('Export Semua Data')
@@ -137,32 +138,40 @@ class RegistrationsTable
                 ]),
             ])
             ->recordActions([
+                Action::make('view_registration_detail')
+                    ->label('Detail')
+                    ->icon('heroicon-o-eye')
+                    ->color('gray')
+                    ->modalWidth('5xl')
+                    ->modalHeading(fn (Registration $record) => 'Detail Pendaftaran #' . $record->id)
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalFooterActions(fn (Registration $record) => self::detailModalActions())
+                    ->modalContent(function (Registration $record, Action $action) {
+                        $record->loadMissing(['event', 'seatAssignment.seat', 'fieldValues.field', 'approver']);
+
+                        /** @var RegistrationApprovalService $svc */
+                        $svc = app(RegistrationApprovalService::class);
+
+                        $visibleActions = array_values(array_filter(
+                            $action->getModalFooterActions(),
+                            fn (Action $modalAction) => $modalAction->isVisible(),
+                        ));
+
+                        return view('filament.registrations.components.registration-detail-modal', [
+                            'registration'     => $record,
+                            'participantName'  => $svc->getParticipantName($record),
+                            'participantPhone' => $svc->getParticipantPhone($record, false),
+                            'detailActions'    => $visibleActions,
+                        ]);
+                    }),
                 ActionGroup::make([
-                    Action::make('approve')
-                        ->label('Approve & QR')
-                        ->icon('heroicon-m-check-badge')
-                        ->color('success')
-                        ->requiresConfirmation()
-                        ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
-                        ->action(function (Registration $record, RegistrationApprovalService $svc) {
-                            $svc->approve($record);
-                        }),
-                    Action::make('reject')
-                        ->color('warning')
-                        ->icon('heroicon-m-x-circle')
-                        ->requiresConfirmation()
-                        ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
-                        ->action(fn (Registration $r) => $r->update([
-                            'status' => Registration::ST_REJECTED,
-                            'checked_in_at' => null,
-                        ])),
-                    Action::make('delete')
-                        ->color('danger')
+                    Action::make('delete_from_modal')
+                        ->label('Delete')
                         ->icon('heroicon-m-trash')
+                        ->color('danger')
                         ->requiresConfirmation()
-                        // ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
                         ->action(fn (Registration $r) => $r->delete()),
-                
                     Action::make('choose_seat')
                         ->label(fn ($record) => $record->seatAssignment ? 'Ubah Kursi' : 'Pilih Kursi')
                         ->icon('heroicon-o-viewfinder-circle')
@@ -259,6 +268,9 @@ class RegistrationsTable
         return [
             TextColumn::make('event.title')
                 ->label('Event')
+                ->toggleable(
+                    isToggledHiddenByDefault: fn () => filled(session('active_event_id'))
+                )
                 ->sortable()
                 ->searchable()
                 ->limit(50)
@@ -292,6 +304,39 @@ class RegistrationsTable
                 ->label('Kursi')
                 ->getStateUsing(fn ($record) => optional($record->seatAssignment?->seat)->label ?? '-'),
             TextColumn::make('created_at')->dateTime()->sortable(),
+        ];
+    }
+
+    protected static function detailModalActions(): array
+    {
+        return [
+            Action::make('approve_from_modal')
+                ->label('Approve & QR')
+                ->icon('heroicon-m-check-badge')
+                ->color('success')
+                ->visible(fn (Registration $r) => $r->status === Registration::ST_PENDING)
+                ->cancelParentActions()
+                ->action(function (Registration $record, RegistrationApprovalService $svc) {
+                    $svc->approve($record);
+                }),
+            Action::make('reject_from_modal')
+                ->label('Reject')
+                ->icon('heroicon-m-x-circle')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->visible(fn (Registration $r) => $r->status === Registration::ST_PENDING)
+                ->cancelParentActions()
+                ->action(fn (Registration $r) => $r->update([
+                    'status' => Registration::ST_REJECTED,
+                    'checked_in_at' => null,
+                ])),
+            Action::make('delete_from_modal')
+                ->label('Delete')
+                ->icon('heroicon-m-trash')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->cancelParentActions()
+                ->action(fn (Registration $r) => $r->delete()),
         ];
     }
 }

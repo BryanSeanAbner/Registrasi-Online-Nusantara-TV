@@ -111,4 +111,88 @@
   .sp-kv .value{ color:#e5e7eb; }
 }
 
+/* ====== Registration detail summary ====== */
+.rf-modal-stack > * + * { margin-top: 1.5rem; }
+.rf-summary-stack > * + * { margin-top: 1rem; }
+.rf-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  padding: .35rem .25rem .75rem;
+  border-bottom: 1px solid rgba(15,23,42,.08);
+  margin-bottom: 1rem;
+}
+.rf-panel {
+  border: 1px solid rgba(15,23,42,.12);
+  border-radius: .8rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.9);
+}
+.rf-panel-title {
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: .85rem;
+}
+.rf-summary-grid {
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+.rf-summary-card {
+  border: 1px solid rgba(15,23,42,.08);
+  border-radius: .65rem;
+  padding: .75rem;
+  background: #ffffff;
+}
+.rf-summary-card dt {
+  font-size: .78rem;
+  color: #6b7280;
+  margin-bottom: .3rem;
+  letter-spacing: .01em;
+}
+.rf-summary-card dd {
+  margin: 0;
+  font-size: .95rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.rf-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.7rem;
+  padding: 0 .9rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 600;
+}
+.rf-status-success { background: #dcfce7; color: #15803d; }
+.rf-status-danger { background: #fee2e2; color: #b91c1c; }
+.rf-status-warning { background: #fef3c7; color: #b45309; }
+.rf-status-muted { background: #e5e7eb; color: #374151; }
+.rf-empty-text { font-size: .85rem; color: #6b7280; margin: 0; }
+
+@media (prefers-color-scheme: dark) {
+  .rf-panel {
+    border-color: rgba(255,255,255,.12);
+    background: rgba(26, 27, 28, 0.7);
+  }
+  .rf-panel-title { color: #d1d5db; }
+  .rf-summary-card {
+    border-color: rgba(255,255,255,.14);
+    background: rgba(26, 27, 28, 0.7);
+  }
+  .rf-summary-card dt { color: #9ca3af; }
+  .rf-summary-card dd { color: #f3f4f6; }
+  .rf-empty-text { color: #d1d5db; }
+  .rf-action-bar { border-color: rgba(255,255,255,.1); }
+  .rf-status-success { background: rgba(34,197,94,.18); color: #4ade80; }
+  .rf-status-danger { background: rgba(248,113,113,.18); color: #fca5a5; }
+  .rf-status-warning { background: rgba(251,191,36,.2); color: #fcd34d; }
+  .rf-status-muted { background: rgba(148,163,184,.24); color: #f3f4f6; }
+}
+
 </style>
