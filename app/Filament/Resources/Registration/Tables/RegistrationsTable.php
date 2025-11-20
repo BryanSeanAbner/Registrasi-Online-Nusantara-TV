@@ -266,6 +266,14 @@ class RegistrationsTable
     public static function baseColumns(): array
     {
         return [
+            TextColumn::make('name_full')
+                ->label('Nama Peserta')
+                ->sortable()
+                ->searchable()
+                ->limit(50)
+                ->wrap()
+                ->state(fn (Registration $record) => app(RegistrationApprovalService::class)->getParticipantName($record))
+                ->tooltip(fn (Registration $record) => (string) (app(RegistrationApprovalService::class)->getParticipantName($record) ?? '')),
             TextColumn::make('event.title')
                 ->label('Event')
                 ->toggleable(
@@ -303,7 +311,7 @@ class RegistrationsTable
             TextColumn::make('seat.assignment.seat.label')
                 ->label('Kursi')
                 ->getStateUsing(fn ($record) => optional($record->seatAssignment?->seat)->label ?? '-'),
-            TextColumn::make('created_at')->dateTime()->sortable(),
+            // TextColumn::make('created_at')->dateTime()->sortable(),
         ];
     }
 
