@@ -266,6 +266,16 @@ class RegistrationsTable
     public static function baseColumns(): array
     {
         return [
+            TextColumn::make('event.title')
+                ->label('Event')
+                ->toggleable(
+                    isToggledHiddenByDefault: fn () => filled(session('active_event_id'))
+                )
+                ->sortable()
+                ->searchable()
+                ->limit(50)
+                ->wrap()
+                ->tooltip(fn (Registration $record) => (string) ($record->event?->title ?? '')),
             TextColumn::make('full_name')
                 ->label('Nama Pendaftar')
                 ->getStateUsing(fn (Registration $record) => app(RegistrationApprovalService::class)->getParticipantName($record) ?? 'Tidak diketahui')
