@@ -7,8 +7,10 @@ use App\Models\Event;
 use App\Repositories\Contracts\FormFieldRepositoryInterface;
 use App\Services\RegistrationService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -132,6 +134,31 @@ class CreateManualRegistration extends Page
                         ->label($label)
                         ->options($options)
                         ->searchable()
+                        ->required($req);
+                    break;
+
+                case 'radio':
+                    $options = [];
+                    if (!empty($meta['options']) && is_array($meta['options'])) {
+                        $options = collect($meta['options'])->mapWithKeys(fn($v) => [(string)$v => (string)$v])->all();
+                    }
+                    $components[] = Radio::make($name)
+                        ->label($label)
+                        ->options($options)
+                        ->helperText($help)
+                        ->required($req);
+                    break;
+
+                case 'checkbox':
+                    $options = [];
+                    if (!empty($meta['options']) && is_array($meta['options'])) {
+                        $options = collect($meta['options'])->mapWithKeys(fn($v) => [(string)$v => (string)$v])->all();
+                    }
+                    $components[] = CheckboxList::make($name)
+                        ->label($label)
+                        ->options($options)
+                        ->helperText($help)
+                        ->columns(1)
                         ->required($req);
                     break;
 
