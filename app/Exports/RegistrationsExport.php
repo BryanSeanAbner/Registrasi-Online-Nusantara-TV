@@ -17,10 +17,12 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
 {
     protected $registrations;
     protected $qrPaths = [];
+    protected $photoPaths = [];
 
     public function __construct($registrations)
     {
-        $this->registrations = $registrations;
+        // Pastikan relasi untuk export sudah ter-load agar bisa deteksi tipe field
+        $this->registrations = $registrations->load(['event', 'seatAssignment.seat', 'fieldValues.field']);
     }
 
     public function collection()
@@ -38,6 +40,7 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
             'Check-in',
             'Kursi',
             'Created at',
+            'Foto',
             'Form Answer',
         ];
     }
@@ -45,8 +48,25 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
     public function map($registration): array
     {
         $answers = [];
+        $firstPhotoPath = null;
         foreach ($registration->fieldValues as $fieldValue) {
-            $answers[] = $fieldValue->field->label . ': ' . $fieldValue->value;
+            $label = $fieldValue->field->label;
+            $value = (string) $fieldValue->value;
+
+            // Jika ini field image, simpan untuk kolom Foto dan JANGAN masukkan ke Form Answer text
+            if (($fieldValue->field->type ?? null) === 'image' && $value !== '') {
+                if (!$firstPhotoPath) {
+                    $rel = ltrim($value, '/');
+                    $full = storage_path('app/public/' . $rel);
+                    if (is_file($full)) {
+                        $firstPhotoPath = $full;
+                    }
+                }
+                continue;
+            }
+
+            // Kumpulkan jawaban teks selain image
+            $answers[] = $label . ': ' . $value;
         }
 
         if ($registration->code) {
@@ -63,6 +83,11 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
             $this->qrPaths[$registration->id] = $filePath;
         }
 
+        // simpan path foto untuk digunakan di drawings()
+        if ($firstPhotoPath) {
+            $this->photoPaths[$registration->id] = $firstPhotoPath;
+        }
+
         return [
             optional($registration->event)->title ?? '-',
             $registration->code ?? '-',
@@ -71,6 +96,7 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
             $registration->checked_in_at ? $registration->checked_in_at->format('d M Y H:i') : 'Belum',
             optional($registration->seatAssignment?->seat)->label ?? '-',
             optional($registration->created_at)->format('d M Y H:i') ?? '-',
+            '', // Kolom Foto akan diisi via drawings()
             implode("\n", $answers),
         ];
     }
@@ -90,6 +116,18 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
                 $drawing->setCoordinates('C' . $row); 
                 $drawings[] = $drawing;
             }
+
+            if (isset($this->photoPaths[$registration->id])) {
+                $p = new Drawing();
+                $p->setName('Foto');
+                $p->setDescription('Foto');
+                $p->setPath($this->photoPaths[$registration->id]);
+                $p->setHeight(80);
+                // Kolom Foto = H (setelah menambah 1 kolom sebelum Form Answer)
+                $p->setCoordinates('H' . $row);
+                $drawings[] = $p;
+            }
+
             $row++;
         }
 
@@ -106,23 +144,24 @@ class RegistrationsExport implements FromCollection, WithHeadings, WithMapping, 
             'E' => 15, 
             'F' => 10, 
             'G' => 20, 
-            'H' => 50, 
+            'H' => 18, // foto
+            'I' => 50, // form answer
         ];
     }
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:H1')->getAlignment()->setHorizontal('center');
-        $sheet->getStyle('A1:H1')->getAlignment()->setVertical('center');
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getAlignment()->setHorizontal('center');
+        $sheet->getStyle('A1:I1')->getAlignment()->setVertical('center');
 
         $sheet->getStyle('A2:G' . ($this->registrations->count() + 1))
             ->getAlignment()->setHorizontal('center');
-        $sheet->getStyle('A2:H' . ($this->registrations->count() + 1))
+        $sheet->getStyle('A2:I' . ($this->registrations->count() + 1))
             ->getAlignment()->setVertical('center');
 
-        $sheet->getStyle('H')->getAlignment()->setWrapText(true);
-        $sheet->getStyle('H')->getAlignment()->setHorizontal('left');
+        $sheet->getStyle('I')->getAlignment()->setWrapText(true);
+        $sheet->getStyle('I')->getAlignment()->setHorizontal('left');
 
         foreach (range(2, $this->registrations->count() + 1) as $row) {
             $sheet->getRowDimension($row)->setRowHeight(85);
