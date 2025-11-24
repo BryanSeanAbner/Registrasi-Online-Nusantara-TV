@@ -12,29 +12,42 @@ class ListRegistrations extends ListRecords
     protected static string $resource = RegistrationResource::class;
 
     protected function getHeaderActions(): array
-{
-    return [
-        Action::make('create_manual')
-            ->label('Daftarkan Manual')
-            ->icon('heroicon-o-user-plus')
-            ->button()
-            ->color('primary')
-            ->url(fn () => static::getResource()::getUrl('create')),
-        Action::make('status_wa')
-            ->label('Status WA')
-            ->icon('heroicon-o-chat-bubble-bottom-center-text')
-            ->button()
-            ->color('warning')
-            ->modalHeading('Daftar Failed Jobs WA')
-            ->modalWidth('3xl')
-            ->modalSubmitAction(false)
-            ->modalCancelAction(false)
-            ->modalContent(function () {
-                $failed = DB::table('failed_jobs')->orderBy('failed_at', 'DESC')->take(10)->get();
-                return view('components.failed-jobs-list', [
-                    'failed' => $failed,
-                ]);
-            }),
-    ];
-}
+    {
+        return [
+            Action::make('create_manual')
+                ->label('Daftarkan Manual')
+                ->icon('heroicon-o-user-plus')
+                ->button()
+                ->color('primary')
+                ->url(fn () => static::getResource()::getUrl('create')),
+            Action::make('status_wa')
+                ->label('Status WA')
+                ->icon('heroicon-o-chat-bubble-bottom-center-text')
+                ->button()
+                ->color('warning')
+                ->modalHeading('Daftar Failed Jobs WA')
+                ->modalWidth('3xl')
+                ->modalSubmitAction(false)
+                ->modalCancelAction(false)
+                ->modalContent(function () {
+                    $failed = DB::table('failed_jobs')->orderBy('failed_at', 'DESC')->take(10)->get();
+
+                    return view('components.failed-jobs-list', [
+                        'failed' => $failed,
+                    ]);
+                }),
+        ];
+    }
+
+    public function getTableColumnsSessionKey(): string
+    {
+        $baseKey = parent::getTableColumnsSessionKey();
+        $eventId = session('active_event_id');
+
+        if (filled($eventId)) {
+            return "{$baseKey}_event_{$eventId}";
+        }
+
+        return "{$baseKey}_default";
+    }
 }

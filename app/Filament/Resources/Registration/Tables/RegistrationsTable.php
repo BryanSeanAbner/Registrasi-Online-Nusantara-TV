@@ -45,7 +45,7 @@ class RegistrationsTable
                 ViewColumn::make('form_answers')
                     ->label('Form Answers')
                     ->view('filament.tables.columns.registration-form-fields')
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(query: function (Builder $query, string $search) {
                         $query->whereHas('fieldValues', function ($q) use ($search) {
                             $q->where('value', 'like', "%{$search}%");
@@ -53,12 +53,35 @@ class RegistrationsTable
                     })
                     ->grow(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->persistSearchInSession()
             ->recordUrl(null)
+            ->recordAction('view_registration_detail')
+            ->headerActions([
+                Action::make('export_all')
+                    ->label('Export Semua Data')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('primary')
+                    ->visible(fn () => filled(session('active_event_id')))
+                    ->action(function () {
+                        $query = Registration::query();
+                        $active = session('active_event_id');
+                        if ($active) {
+                            $query->where('event_id', $active);
+                        }
+
+                        $records = $query->with(['event', 'seatAssignment.seat', 'fieldValues.field'])->get();
+
+                        return Excel::download(
+                            new \App\Exports\RegistrationsExport($records),
+                            'registrations-all-' . now()->format('Y-m-d') . '.xlsx'
+                        );
+                    }),
+            ])
             ->bulkActions([
                 BulkActionGroup::make([
                     BulkAction::make('export')
-                        ->label('Export Excel')
+                        ->label('Export Terpilih')
                         ->icon('heroicon-o-arrow-down-tray')
                         ->action(function (Collection $records) {
                             return Excel::download(
@@ -108,39 +131,47 @@ class RegistrationsTable
 
                             Notification::make()
                                 ->title('Bulk Approve selesai')
-                                ->body($summary . (count($fails) ? "\n\nGagal:\n- " . implode("\n- ", array_slice($fails, 0, 5)) . (count($fails) > 5 ? "\n…" : "") : ""))
+                                ->body($summary . (count($fails) ? "\n\nGagal:\n- " . implode("\n- ", array_slice($fails, 0, 5)) . (count($fails) > 5 ? "\nâ€¦" : "") : ""))
                                 ->success()
                                 ->send();
                         }),
                 ]),
             ])
             ->recordActions([
+                Action::make('view_registration_detail')
+                    ->label('Detail')
+                    ->icon('heroicon-o-eye')
+                    ->color('gray')
+                    ->modalWidth('5xl')
+                    ->modalHeading(fn (Registration $record) => 'Detail Pendaftaran #' . $record->id)
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalFooterActions(fn (Registration $record) => self::detailModalActions())
+                    ->modalContent(function (Registration $record, Action $action) {
+                        $record->loadMissing(['event', 'seatAssignment.seat', 'fieldValues.field', 'approver']);
+
+                        /** @var RegistrationApprovalService $svc */
+                        $svc = app(RegistrationApprovalService::class);
+
+                        $visibleActions = array_values(array_filter(
+                            $action->getModalFooterActions(),
+                            fn (Action $modalAction) => $modalAction->isVisible(),
+                        ));
+
+                        return view('filament.registrations.components.registration-detail-modal', [
+                            'registration'     => $record,
+                            'participantName'  => $svc->getParticipantName($record),
+                            'participantPhone' => $svc->getParticipantPhone($record, false),
+                            'detailActions'    => $visibleActions,
+                        ]);
+                    }),
                 ActionGroup::make([
-                    Action::make('approve')
-                        ->label('Approve & QR')
-                        ->icon('heroicon-m-check-badge')
-                        ->color('success')
-                        ->requiresConfirmation()
-                        ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
-                        ->action(function (Registration $record, RegistrationApprovalService $svc) {
-                            $svc->approve($record);
-                        }),
-                    Action::make('reject')
-                        ->color('warning')
-                        ->icon('heroicon-m-x-circle')
-                        ->requiresConfirmation()
-                        ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
-                        ->action(fn (Registration $r) => $r->update([
-                            'status' => Registration::ST_REJECTED,
-                            'checked_in_at' => null,
-                        ])),
-                    Action::make('delete')
-                        ->color('danger')
+                    Action::make('delete_from_modal')
+                        ->label('Delete')
                         ->icon('heroicon-m-trash')
+                        ->color('danger')
                         ->requiresConfirmation()
-                        // ->visible(fn (Registration $r) => $r->status !== Registration::ST_APPROVED)
                         ->action(fn (Registration $r) => $r->delete()),
-                
                     Action::make('choose_seat')
                         ->label(fn ($record) => $record->seatAssignment ? 'Ubah Kursi' : 'Pilih Kursi')
                         ->icon('heroicon-o-viewfinder-circle')
@@ -237,8 +268,25 @@ class RegistrationsTable
         return [
             TextColumn::make('event.title')
                 ->label('Event')
+                ->toggleable(
+                    isToggledHiddenByDefault: fn () => filled(session('active_event_id'))
+                )
                 ->sortable()
-                ->searchable(),
+                ->searchable()
+                ->limit(50)
+                ->wrap()
+                ->tooltip(fn (Registration $record) => (string) ($record->event?->title ?? '')),
+            TextColumn::make('full_name')
+                ->label('Nama Pendaftar')
+                ->getStateUsing(fn (Registration $record) => app(RegistrationApprovalService::class)->getParticipantName($record) ?? 'Tidak diketahui')
+                ->searchable(query: function (Builder $query, string $search) {
+                    $query->whereHas('fieldValues', function ($q) use ($search) {
+                        $q->where('value', 'like', "%{$search}%");
+                    });
+                })
+                ->limit(50)
+                ->wrap()
+                ->tooltip(fn (Registration $record) => (string) (app(RegistrationApprovalService::class)->getParticipantName($record) ?? '')),
             TextColumn::make('status')
                 ->badge()
                 ->color(fn (string $state) => match ($state) {
@@ -265,8 +313,41 @@ class RegistrationsTable
                 ->formatStateUsing(fn () => ''),
             TextColumn::make('seat.assignment.seat.label')
                 ->label('Kursi')
-                ->getStateUsing(fn ($record) => optional($record->seatAssignment?->seat)->label ?? '—'),
-            TextColumn::make('created_at')->dateTime()->sortable(),
+                ->getStateUsing(fn ($record) => optional($record->seatAssignment?->seat)->label ?? '-'),
+            // TextColumn::make('created_at')->dateTime()->sortable(),
+        ];
+    }
+
+    protected static function detailModalActions(): array
+    {
+        return [
+            Action::make('approve_from_modal')
+                ->label('Approve & QR')
+                ->icon('heroicon-m-check-badge')
+                ->color('success')
+                ->visible(fn (Registration $r) => $r->status === Registration::ST_PENDING)
+                ->cancelParentActions()
+                ->action(function (Registration $record, RegistrationApprovalService $svc) {
+                    $svc->approve($record);
+                }),
+            Action::make('reject_from_modal')
+                ->label('Reject')
+                ->icon('heroicon-m-x-circle')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->visible(fn (Registration $r) => $r->status === Registration::ST_PENDING)
+                ->cancelParentActions()
+                ->action(fn (Registration $r) => $r->update([
+                    'status' => Registration::ST_REJECTED,
+                    'checked_in_at' => null,
+                ])),
+            Action::make('delete_from_modal')
+                ->label('Delete')
+                ->icon('heroicon-m-trash')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->cancelParentActions()
+                ->action(fn (Registration $r) => $r->delete()),
         ];
     }
 }

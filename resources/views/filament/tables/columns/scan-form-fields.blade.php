@@ -41,7 +41,7 @@
 @endphp
 
 @if ($items->isEmpty())
-  <span class="rf-badge">Tidak ada jawaban</span>
+  <x-filament::badge color="gray">Tidak ada jawaban</x-filament::badge>
 @else
   <div class="sp-kvlist">
     @foreach ($chips as $item)

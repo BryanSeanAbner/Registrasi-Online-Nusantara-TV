@@ -38,7 +38,7 @@ class FormFieldForm
 
                     // Auto-suggest next order for this event
                     if ($state) {
-                        $max = (int) (FormFieldModel::where('event_id', $state)->max('sort_order') ?? -1);
+                        $max = (int) (FormFieldModel::where('event_id', $state)->max('sort_order') ?? 0);
                         $set('sort_order', $max + 1);
                     }
                 })
@@ -112,7 +112,7 @@ class FormFieldForm
                 ->default(function (Get $get) {
                     $eventId = $get('event_id');
                     if ($eventId) {
-                        $max = (int) (FormFieldModel::where('event_id', $eventId)->max('sort_order') ?? -1);
+                        $max = (int) (FormFieldModel::where('event_id', $eventId)->max('sort_order') ?? 0);
                         return $max + 1;
                     }
                     return 1;
@@ -127,3 +127,4 @@ class FormFieldForm
         ]);
     }
 }
+

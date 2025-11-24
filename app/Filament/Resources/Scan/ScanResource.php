@@ -35,4 +35,9 @@ class ScanResource extends Resource
             'list' => Pages\ListScans::route('/list'),
         ];
     }
+
+    public static function shouldRegisterNavigation(array $parameters = []): bool
+    {
+        return false;
+    }
 }

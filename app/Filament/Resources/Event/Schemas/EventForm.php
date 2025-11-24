@@ -31,22 +31,20 @@ class EventForm
                             TextInput::make('title')
                                 ->label('Title')
                                 ->required()
-                                ->reactive()
+                                ->live(onBlur: true)
                                 ->afterStateUpdated(function (Set $set, Get $get, $state) {
-                                    if ($get('id')) {
-                                        return;
-                                    }
-
                                     $base = Str::slug($state ?? '');
                                     if ($base === '') {
                                         $set('slug', '');
                                         return;
                                     }
 
+                                    $id = $get('id');
                                     $slug = $base;
                                     $i = 2;
                                     while (
                                         Event::query()
+                                            ->when($id, fn ($q) => $q->where('id', '!=', $id))
                                             ->where('slug', $slug)
                                             ->exists()
                                     ) {

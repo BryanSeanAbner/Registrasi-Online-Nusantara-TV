@@ -171,7 +171,7 @@ class RegistrationApprovalService
 
         $response = Http::asJson()
             ->acceptJson()
-            ->timeout(60)
+            ->timeout(120)
             ->connectTimeout(5)
             ->withoutRedirecting()
             ->withOptions([
@@ -254,7 +254,7 @@ class RegistrationApprovalService
 
         $response = Http::asJson()
             ->acceptJson()
-            ->timeout(60)
+            ->timeout(120)
             ->connectTimeout(5)
             ->withoutRedirecting()
             ->withOptions([

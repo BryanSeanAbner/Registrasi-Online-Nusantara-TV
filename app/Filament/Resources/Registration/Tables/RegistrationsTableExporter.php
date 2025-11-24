@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Registration\Tables;
 
 use App\Models\Registration;
+use App\Models\FormField;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
@@ -14,7 +15,7 @@ class RegistrationsTableExporter extends Exporter
 
     public static function getColumns(): array
     {
-        return [
+        $columns = [
             ExportColumn::make('event.title')
                 ->label('Event'),
             ExportColumn::make('code')
@@ -29,16 +30,45 @@ class RegistrationsTableExporter extends Exporter
                 ->label('Disetujui Oleh'),
             ExportColumn::make('created_at')
                 ->label('Tanggal Daftar'),
-            ExportColumn::make('form_answers')
-                ->label('Form Jawaban')
-                ->state(function (Registration $record): string {
-                    $answers = [];
-                    foreach ($record->fieldValues as $fieldValue) {
-                        $answers[] = $fieldValue->field->label . ': ' . $fieldValue->value;
-                    }
-                    return implode("\n", $answers);
-                }),
         ];
+
+        $activeEventId = session('active_event_id');
+
+        $fieldsQuery = FormField::query();
+        if ($activeEventId) {
+            $fieldsQuery->where('event_id', $activeEventId);
+        }
+
+        $fields = $fieldsQuery->orderBy('sort_order')->orderBy('id')->get();
+
+        foreach ($fields as $field) {
+            $columns[] = ExportColumn::make('field_' . $field->id)
+                ->label($field->label)
+                ->state(function (Registration $record) use ($field): string {
+                    $fv = $record->fieldValues->firstWhere('field_id', $field->id);
+
+                    if (!$fv) {
+                        return '';
+                    }
+
+                    $value = $fv->value;
+
+                    if ($value === null || $value === '') {
+                        $json = $fv->value_json ?? null;
+                        if (is_array($json)) {
+                            return implode(', ', array_map('strval', $json));
+                        }
+
+                        if ($fv->value_number !== null) {
+                            return (string) $fv->value_number;
+                        }
+                    }
+
+                    return (string) ($value ?? '');
+                });
+        }
+
+        return $columns;
     }
 
     public function getFileName(Export $export): string

@@ -17,14 +17,14 @@ class RegistrationController extends Controller
 
     public function create(string $slug)
     {
-        $event = $this->events->findBySlug($slug);
+        $event = $this->events->findPublishedBySlug($slug);
         $fields = $this->formFields->getFormFieldsForEvent($event);
         return view('public.register.form', compact('event', 'fields'));
     }
 
     public function store(Request $request, string $slug)
     {
-        $event = $this->events->findBySlug($slug);
+        $event = $this->events->findPublishedBySlug($slug);
         $rules = $this->registrations->buildValidationRules($event);
         $data = $request->validate($rules);
 
@@ -35,4 +35,3 @@ class RegistrationController extends Controller
             ->with('registration_id', $registration->id);
     }
 }
-

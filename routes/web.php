@@ -8,6 +8,9 @@ use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SeatController;
 use App\Http\Controllers\CheckAnimationController;
 use Illuminate\Support\Facades\Response;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\Event;
+use App\Services\QrService;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -45,8 +48,20 @@ Route::post('/e/{slug}/register', [RegistrationController::class, 'store'])->nam
 Route::get('/e/{slug}/register/thanks', function(string $slug) {
     return view('public.register.thanks');
 })->name('register.thanks');
+Route::get('/e/{slug}/register/qrcode.png', function (string $slug) {
+    $event = Event::where('slug', $slug)->firstOrFail();
+    /** @var QrService $svc */
+    $svc = app(QrService::class);
+    $png = $svc->registrationQrForEvent($event, 600, 1);
 
-
+    $filename = 'register-' . $slug . '.png';
+    return response($png, 200, [
+        'Content-Type' => 'image/png',
+        'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma' => 'no-cache',
+    ]);
+})->name('event.register.qr');
 
 Route::get('/t/{code}', [TicketController::class, 'show'])->name('ticket.show');
 Route::get('/t/{code}/qrcode/preview', function (string $code) {
