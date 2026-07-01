@@ -146,9 +146,3 @@ database/migrations/      # Skema database
 ## Lisensi
 
 Project ini menggunakan [Laravel Framework](https://laravel.com) yang dilisensikan di bawah [MIT License](https://opensource.org/licenses/MIT).
-
----
-
-## Kontak & Dukungan
-
-Untuk pertanyaan teknis atau permintaan fitur terkait sistem registrasi NTV, hubungi tim pengembang internal NTV.
