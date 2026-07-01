@@ -1,4 +1,4 @@
-# Registrasi Online — Nusanara TV Event Management System
+# Registrasi Online — Nusantara TV Event Management System
 
 Sistem registrasi dan manajemen peserta acara berbasis web yang dikembangkan khusus untuk **NTV** sebagai pengelola acara. Aplikasi ini membantu tim NTV mengelola seluruh siklus peserta — mulai dari pendaftaran online, persetujuan, pengiriman tiket digital, hingga check-in di lokasi acara.
 
@@ -121,7 +121,7 @@ Hari H: Scan QR code → Check-in
 
 ---
 
-## Struktur Direktori Penting
+## Struktur Direktori
 
 ```
 app/
